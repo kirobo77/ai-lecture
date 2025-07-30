@@ -4,35 +4,35 @@
 
 - [RAG의 모든 것](#RAG의-모든-것)
   - [1. AI와 언어모델 기초 이해](#1-AI와-언어모델-기초-이해)
-    - [1.1 NLP, Natural Language Processing(자연어 처리)란 무엇인가?](#1.1-NLP-Natural-Language-Processing(자연어-처리)란-무엇인가?)
-    - [1.2 NLP Preprocessing(전처리)](#1.2-NLP-Preprocessing(전처리))
-    - [1.3 NLP 주요 Task](#1.3-NLP-주요-Task)
-    - [1.4 NLP 모델링 및 구조](#1.4-NLP-모델링-및-구조)
-    - [1.5 NLP의 논쟁과 한계](#1.5-NLP의-논쟁과-한계)
-    - [1.6 Trasnformer란 무엇인가?](#1.6-Trasnformer란-무엇인가?)
-    - [1.7 Transformer 구조](#1.7-Transformer-구조)
-    - [1.8 LLM(대규모 언어모델)의 주요 개념 정리](#1.8-LLM(대규모-언어모델)의-주요-개념-정리)
-    - [1.9 프롬프트 엔지니어링 기초](#1.9-프롬프트-엔지니어링-기초)
-    - [1.10 컨텍스트 엔지니어링과 정보 처리](#1.10-컨텍스트-엔지니어링과-정보-처리)
-    - [1.11 LLM의 한계: Attention Decay(망각 현상)과 Hallucination(환각 현상)](#1.11-LLM의-한계-Attention-Decay(망각-현상)과-Hallucination(환각-현상))
+    - [1.1 NLP, Natural Language Processing(자연어 처리)란 무엇인가?](#11-NLP-Natural-Language-Processing자연어-처리란-무엇인가)
+    - [1.2 NLP Preprocessing(전처리)](#12-NLP-Preprocessing전처리)
+    - [1.3 NLP 주요 Task](#13-NLP-주요-Task)
+    - [1.4 NLP 모델링 및 구조](#14-NLP-모델링-및-구조)
+    - [1.5 NLP의 논쟁과 한계](#15-NLP의-논쟁과-한계)
+    - [1.6 Trasnformer란 무엇인가?](#16-Trasnformer란-무엇인가)
+    - [1.7 Transformer 구조](#17-Transformer-구조)
+    - [1.8 LLM(대규모 언어모델)의 주요 개념 정리](#18-LLM대규모-언어모델의-주요-개념-정리)
+    - [1.9 프롬프트 엔지니어링 기초](#19-프롬프트-엔지니어링-기초)
+    - [1.10 컨텍스트 엔지니어링과 정보 처리](#110-컨텍스트-엔지니어링과-정보-처리)
+    - [1.11 LLM의 한계: Attention Decay(망각 현상)과 Hallucination(환각 현상)](#111-LLM의-한계-Attention-Decay망각-현상과-Hallucination환각-현상)
   - [2. 임베딩과 벡터 데이터베이스](#2-임베딩과-벡터-데이터베이스)
-    - [2.1 Vector(벡터)란 무엇인가?](#2.1-Vector(벡터)란-무엇인가?)
-    - [2.2 임베딩의 원리와 활용](#2.2-임베딩의-원리와-활용)
-    - [2.3 벡터 데이터베이스 구축](#2.3-벡터-데이터베이스-구축)
+    - [2.1 Vector(벡터)란 무엇인가?](#21-Vector벡터란-무엇인가)
+    - [2.2 임베딩의 원리와 활용](#22-임베딩의-원리와-활용)
+    - [2.3 벡터 데이터베이스 구축](#23-벡터-데이터베이스-구축)
   - [3. RAG 시스템 설계와 구현](#3-RAG-시스템-설계와-구현)
-    - [3.1 설계 기본](#3.1-설계-기본)
-    - [3.2 RAG가 해결하는 LLM의 문제점](#3.2-RAG가-해결하는-LLM의-문제점)
-    - [3.3 RAG 기법](#3.3-RAG-기법)
-    - [3.4 RAG 성능 최적화 전략](#3.4-RAG-성능-최적화-전략)
+    - [3.1 설계 기본](#31-설계-기본)
+    - [3.2 RAG가 해결하는 LLM의 문제점](#32-RAG가-해결하는-LLM의-문제점)
+    - [3.3 RAG 기법](#33-RAG-기법)
+    - [3.4 RAG 성능 최적화 전략](#34-RAG-성능-최적화-전략)
 - [에이전트의 모든 것](#에이전트의-모든-것)
   - [4. 단일 에이전트와 멀티 에이전트 시스템](#4-단일-에이전트와-멀티-에이전트-시스템)
-    - [4.1 AI 에이전트 기초 개념](#4.1-AI-에이전트-기초-개념)
-    - [4.2 단일 에이전트 시스템 구축](#4.2-단일-에이전트-시스템-구축)
-    - [4.3 멀티 에이전트 시스템 아키텍처](#4.3-멀티-에이전트-시스템-아키텍처)
+    - [4.1 AI 에이전트 기초 개념](#41-AI-에이전트-기초-개념)
+    - [4.2 단일 에이전트 시스템 구축](#42-단일-에이전트-시스템-구축)
+    - [4.3 멀티 에이전트 시스템 아키텍처](#43-멀티-에이전트-시스템-아키텍처)
 - [MCP의 모든 것](#MCP의-모든-것)
   - [5. MCP 활용](#5-MCP-활용)
-    - [5.1 MCP(Model Context Protocol) 개요](#5.1-MCP(Model-Context-Protocol)-개요)
-    - [5.2 MCP 설계 구성 요소 및 작동 방식](#5.2-MCP-설계-구성-요소-및-작동-방식)
+    - [5.1 MCP(Model Context Protocol) 개요](#51-MCPModel-Context-Protocol-개요)
+    - [5.2 MCP 설계 구성 요소 및 작동 방식](#52-MCP-설계-구성-요소-및-작동-방식)
 
 ---
 
@@ -157,10 +157,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
 
   - 세 개의 가중치 행렬($W_Q$, $W_K$, $W_V$)을 통해 다음 계산 수행:
 
-    **Scaled Dot-Product Attention 연산**:
-    $$
-    Attention(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
-    $$
+    **Scaled Dot-Product Attention 연산**: $Attention(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
 
     - Transformer에서 사용하는 Attention 메커니즘의 기본 형태로, Query, Key, Value 벡터 사이의 연산을 통해 중요도를 계산하고 가중합을 반환
     - **Q: Query 행렬(입력 단어의 질문 역할)**
