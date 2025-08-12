@@ -138,7 +138,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
 
 #### 1.7 Transformer 구조
 
-![transformer-architecture](https://github.com/parkseohuinim/tech-theory-archive/blob/main/ai/basic/transformer-architecture.png)
+![transformer-architecture](./assets/transformer-architecture.png)
 
 - 왼쪽: Encoder 구조
 
@@ -486,7 +486,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
   - $CosineSim(A, B) = (A · B) / (||A|| * ||B||)$
   - 두 벡터 사이 **방향(Orientation)** 의 유사성을 측정하는 지표로 벡터의 크기(길이)는 무시하고, 두 벡터가 이루는 **각도 θ의 코사인값**을 통해 얼마나 방향이 가까운지 평가
   - 값의 범위는 $[-1, +1]$이며, 일반적으로 TF-IDF처럼 음수가 없는 경우 0에서 1 사이로 표현
-  - ![cosine-similarity](https://github.com/parkseohuinim/tech-theory-archive/blob/main/ai/basic/cosine-similarity.png)
+    ![cosine-similarity](./assets/cosine-similarity.png)
   - **1**: 완전 동일한 방향 (θ=0°)
   - **0**: 직교(Orthogonal), 유사성 없음 (θ=90°)
   - **–1**: 반대 방향 (θ=180°)
