@@ -10,6 +10,7 @@ from typing import List, Dict, Any, Optional, Union
 from sklearn.metrics.pairwise import cosine_similarity
 import tiktoken
 import time
+import httpx
 try:
     # lab 파일에서 실행될 때
     from shared.config import *
@@ -21,8 +22,11 @@ except ImportError:
 logging.basicConfig(level=getattr(logging, LOG_LEVEL))
 logger = logging.getLogger(__name__)
 
+# SSL 검증 비활성화 HTTP 클라이언트 생성
+no_ssl_httpx = httpx.Client(verify=False)
+
 # OpenAI 클라이언트 초기화
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY, http_client=no_ssl_httpx)
 
 class EmbeddingUtils:
     """임베딩 관련 유틸리티 클래스"""
