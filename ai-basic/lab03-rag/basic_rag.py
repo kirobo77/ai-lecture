@@ -92,11 +92,8 @@ class DocumentRetriever:
         try:
             self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIRECTORY)
             
-            # OpenAI 임베딩 함수 설정
-            openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=OPENAI_API_KEY,
-                model_name="text-embedding-ada-002"
-            )
+            # OpenAI 임베딩 함수 설정 (SSL 검증 비활성화)
+            openai_ef = ChromaUtils.create_openai_embedding_function()
             
             # 컬렉션 가져오기 또는 생성
             try:

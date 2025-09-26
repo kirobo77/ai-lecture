@@ -14,6 +14,7 @@ import httpx
 import os
 import ssl
 import urllib3
+from chromadb.utils import embedding_functions
 try:
     # lab 파일에서 실행될 때
     from shared.config import *
@@ -165,6 +166,20 @@ class ChatUtils:
         except Exception as e:
             logger.error(f"채팅 응답 생성 실패: {e}")
             raise
+
+class ChromaUtils:
+    """ChromaDB 관련 유틸리티 클래스"""
+    
+    @staticmethod
+    def create_openai_embedding_function(api_key: str = OPENAI_API_KEY, 
+                                       model_name: str = "text-embedding-ada-002"):
+        """SSL 검증 비활성화된 OpenAI 임베딩 함수 생성"""
+        http_client = httpx.Client(verify=False)
+        return embedding_functions.OpenAIEmbeddingFunction(
+            api_key=api_key,
+            model_name=model_name,
+            http_client=http_client
+        )
 
 class PerformanceUtils:
     """성능 측정 유틸리티 클래스"""
