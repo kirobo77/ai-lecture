@@ -11,12 +11,20 @@ from sklearn.metrics.pairwise import cosine_similarity
 import tiktoken
 import time
 import httpx
+import os
+import ssl
+import urllib3
 try:
     # lab 파일에서 실행될 때
     from shared.config import *
 except ImportError:
     # shared 디렉토리에서 직접 실행될 때
     from config import *
+
+# SSL 검증 비활성화 설정 (사내망 환경용)
+os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['REQUESTS_CA_BUNDLE'] = ''
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 로깅 설정
 logging.basicConfig(level=getattr(logging, LOG_LEVEL))
