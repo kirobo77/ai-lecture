@@ -414,9 +414,9 @@ def generate_mock_content(file_info: FileInfo) -> str:
 # 서버 실행 함수
 def run_server():
     """File Manager API 서버 실행"""
-    print("📁 File Manager API 서버 시작 중...")
-    print("📍 URL: http://localhost:8003")
-    print("📖 API 문서: http://localhost:8003/docs")
+    print(" File Manager API 서버 시작 중...")
+    print(" URL: http://localhost:8003")
+    print(" API 문서: http://localhost:8003/docs")
     
     uvicorn.run(
         "file_manager_api:app",

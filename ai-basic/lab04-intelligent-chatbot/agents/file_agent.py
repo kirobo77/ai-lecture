@@ -333,7 +333,7 @@ class FileAgent:
             size = data.get("size", 0)
             file_type = data.get("type", "unknown")
             
-            response = f"📄 {name} 내용\n\n"
+            response = f" {name} 내용\n\n"
             
             if len(content) > 500:
                 response += f"```\n{content[:500]}...\n```\n\n"
@@ -350,9 +350,9 @@ class FileAgent:
             directory = file_result.get("directory", "루트")
             
             if total_files == 0:
-                return f"📁 {directory}\n\n파일이 없습니다."
+                return f" {directory}\n\n파일이 없습니다."
             
-            response = f"📁 {directory} ({total_files}개 파일)\n\n"
+            response = f" {directory} ({total_files}개 파일)\n\n"
             
             # 타입별 그룹화
             type_groups = {}
@@ -473,7 +473,7 @@ class FileAgent:
                     
                     if auto_query:
                         query = auto_query
-                        print(f"🔄 [자동 검색어 추출] '{query}'")
+                        print(f" [자동 검색어 추출] '{query}'")
                     else:
                         return {
                             "success": False,
@@ -591,13 +591,13 @@ class FileAgent:
                 for match in matches:
                     match = match.strip()
                     if len(match) > 1 and match not in ["이", "그", "저", "것", "거"]:
-                        print(f"🔍 패턴 매칭으로 키워드 추출: '{match}'")
+                        print(f" 패턴 매칭으로 키워드 추출: '{match}'")
                         return match
             
             # 알려진 키워드 직접 검색
             for keyword in file_keywords:
                 if keyword in user_input_lower:
-                    print(f"🔍 키워드 사전에서 추출: '{keyword}'")
+                    print(f" 키워드 사전에서 추출: '{keyword}'")
                     return keyword
             
             # 마지막 수단: 명사 추출 (간단한 휴리스틱)

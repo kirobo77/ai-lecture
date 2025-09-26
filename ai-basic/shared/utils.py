@@ -190,7 +190,7 @@ def print_progress(current: int, total: int, prefix: str = "Progress"):
     percent = (current / total) * 100
     bar_length = 30
     filled_length = int(bar_length * current // total)
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+    bar = '#' * filled_length + '-' * (bar_length - filled_length)
     print(f'\r{prefix}: |{bar}| {percent:.1f}% ({current}/{total})', end='')
     if current == total:
         print()  # 완료 시 새 줄
