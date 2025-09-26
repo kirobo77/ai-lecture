@@ -57,7 +57,8 @@ def create_collection(client, collection_name=None, reset=False):
     # OpenAI 임베딩 함수 설정
     openai_ef = embedding_functions.OpenAIEmbeddingFunction(
         api_key=OPENAI_API_KEY,
-        model_name="text-embedding-ada-002"
+        model_name="text-embedding-ada-002",
+        ssl_verify=False  # SSL 검증 비활성화
     )
     
     # 컬렉션 생성 또는 가져오기
