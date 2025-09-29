@@ -135,10 +135,7 @@ class HybridRetriever:
         try:
             self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIRECTORY)
             
-            openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=OPENAI_API_KEY,
-                model_name="text-embedding-ada-002"
-            )
+            openai_ef = ChromaUtils.create_openai_embedding_function()
             
             try:
                 self.collection = self.client.get_collection(

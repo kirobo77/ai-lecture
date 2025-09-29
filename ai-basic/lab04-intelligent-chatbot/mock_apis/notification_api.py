@@ -396,9 +396,9 @@ def simulate_delivery_success(channel: str, priority: str) -> float:
 # 서버 실행 함수
 def run_server():
     """Notification API 서버 실행"""
-    print("📢 Notification API 서버 시작 중...")
-    print("📍 URL: http://localhost:8004")
-    print("📖 API 문서: http://localhost:8004/docs")
+    print(" Notification API 서버 시작 중...")
+    print(" URL: http://localhost:8004")
+    print(" API 문서: http://localhost:8004/docs")
     
     uvicorn.run(
         "notification_api:app",

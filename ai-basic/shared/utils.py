@@ -10,6 +10,11 @@ from typing import List, Dict, Any, Optional, Union
 from sklearn.metrics.pairwise import cosine_similarity
 import tiktoken
 import time
+import httpx
+import os
+import ssl
+import urllib3
+from chromadb.utils import embedding_functions
 try:
     # lab 파일에서 실행될 때
     from shared.config import *
@@ -17,12 +22,20 @@ except ImportError:
     # shared 디렉토리에서 직접 실행될 때
     from config import *
 
+# SSL 검증 비활성화 설정 (사내망 환경용)
+os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['REQUESTS_CA_BUNDLE'] = ''
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 # 로깅 설정
 logging.basicConfig(level=getattr(logging, LOG_LEVEL))
 logger = logging.getLogger(__name__)
 
+# SSL 검증 비활성화 HTTP 클라이언트 생성
+no_ssl_httpx = httpx.Client(verify=False)
+
 # OpenAI 클라이언트 초기화
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY, http_client=no_ssl_httpx)
 
 class EmbeddingUtils:
     """임베딩 관련 유틸리티 클래스"""
@@ -154,6 +167,20 @@ class ChatUtils:
             logger.error(f"채팅 응답 생성 실패: {e}")
             raise
 
+class ChromaUtils:
+    """ChromaDB 관련 유틸리티 클래스"""
+    
+    @staticmethod
+    def create_openai_embedding_function(api_key: str = OPENAI_API_KEY, 
+                                       model_name: str = "text-embedding-ada-002"):
+        """SSL 검증 비활성화된 OpenAI 임베딩 함수 생성"""
+        http_client = httpx.Client(verify=False)
+        return embedding_functions.OpenAIEmbeddingFunction(
+            api_key=api_key,
+            model_name=model_name,
+            http_client=http_client
+        )
+
 class PerformanceUtils:
     """성능 측정 유틸리티 클래스"""
     
@@ -186,7 +213,7 @@ def print_progress(current: int, total: int, prefix: str = "Progress"):
     percent = (current / total) * 100
     bar_length = 30
     filled_length = int(bar_length * current // total)
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+    bar = '#' * filled_length + '-' * (bar_length - filled_length)
     print(f'\r{prefix}: |{bar}| {percent:.1f}% ({current}/{total})', end='')
     if current == total:
         print()  # 완료 시 새 줄

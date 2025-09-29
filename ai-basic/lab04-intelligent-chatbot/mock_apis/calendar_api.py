@@ -314,9 +314,9 @@ def calculate_free_time(events: List[Event]) -> List[str]:
 # 서버 실행 함수
 def run_server():
     """Calendar API 서버 실행"""
-    print("📅 Calendar API 서버 시작 중...")
-    print("📍 URL: http://localhost:8002")
-    print("📖 API 문서: http://localhost:8002/docs")
+    print(" Calendar API 서버 시작 중...")
+    print(" URL: http://localhost:8002")
+    print(" API 문서: http://localhost:8002/docs")
     
     uvicorn.run(
         "calendar_api:app",

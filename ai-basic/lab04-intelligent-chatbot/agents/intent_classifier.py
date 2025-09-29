@@ -30,11 +30,8 @@ class IntentClassifier:
         # ChromaDB 클라이언트 설정
         self.chroma_client = chromadb.PersistentClient(path="./data/intent_db")
         
-        # OpenAI 임베딩 함수 설정
-        self.openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-            api_key=OPENAI_API_KEY,
-            model_name="text-embedding-ada-002"
-        )
+        # OpenAI 임베딩 함수 설정 (SSL 검증 비활성화)
+        self.openai_ef = ChromaUtils.create_openai_embedding_function()
         
         # 의도 분석 지식베이스 초기화
         self.initialize_knowledge_base()

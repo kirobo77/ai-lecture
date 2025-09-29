@@ -100,10 +100,10 @@ def display_header():
 def display_sidebar():
     """사이드바 표시"""
     with st.sidebar:
-        st.header("🔧 시스템 설정")
+        st.header(" 시스템 설정")
         
         # API 상태 체크
-        st.subheader("📡 API 서버 상태")
+        st.subheader(" API 서버 상태")
         api_status = check_api_servers()
         
         for api_name, status in api_status.items():
@@ -124,12 +124,12 @@ def display_sidebar():
         st.divider()
         
         # 설정 옵션
-        st.subheader("⚙️ 설정")
+        st.subheader(" 설정")
         
         show_debug = st.checkbox("디버그 모드", help="상세한 로그 표시")
         auto_clear = st.checkbox("자동 대화 정리", help="10개 이상시 자동 정리")
         
-        if st.button("🗑️ 대화 기록 삭제"):
+        if st.button(" 대화 기록 삭제"):
             st.session_state.messages = []
             st.session_state.conversation_history = []
             st.success("대화 기록이 삭제되었습니다.")

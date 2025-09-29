@@ -174,9 +174,9 @@ async def update_weather_data(city: str, weather: WeatherInfo):
 # 서버 실행 함수
 def run_server():
     """Weather API 서버 실행"""
-    print("🌤️  Weather API 서버 시작 중...")
-    print("📍 URL: http://localhost:8001")
-    print("📖 API 문서: http://localhost:8001/docs")
+    print(" Weather API 서버 시작 중...")
+    print(" URL: http://localhost:8001")
+    print(" API 문서: http://localhost:8001/docs")
     
     uvicorn.run(
         "weather_api:app",

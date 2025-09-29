@@ -39,6 +39,7 @@ fastapi>=0.100.0
 uvicorn>=0.20.0
 httpx>=0.24.0
 requests>=2.28.0
+urllib3>=1.26.0
 
 # MCP 통신 및 비동기 처리
 websockets>=11.0.0
