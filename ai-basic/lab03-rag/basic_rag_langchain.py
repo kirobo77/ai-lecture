@@ -11,6 +11,7 @@ from shared.config import validate_api_keys, CHROMA_PERSIST_DIRECTORY, OPENAI_AP
 import time
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+import httpx
 
 # LangChain imports
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -20,6 +21,10 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain.schema import Document
+
+# SSL 검증 비활성화 HTTP 클라이언트
+no_ssl_httpx = httpx.Client(verify=False)
+
 
 @dataclass
 class LangChainRAGResponse:
@@ -43,13 +48,15 @@ class LangChainRAGSystem:
         # LangChain 컴포넌트 초기화
         self.embeddings = OpenAIEmbeddings(
             openai_api_key=OPENAI_API_KEY,
-            model="text-embedding-ada-002"
+            model="text-embedding-ada-002",
+            http_client=no_ssl_httpx
         )
         
         self.llm = ChatOpenAI(
             openai_api_key=OPENAI_API_KEY,
             model=CHAT_MODEL,
-            temperature=0.1
+            temperature=0.1,
+            http_client=no_ssl_httpx
         )
         
         self.text_splitter = RecursiveCharacterTextSplitter(
