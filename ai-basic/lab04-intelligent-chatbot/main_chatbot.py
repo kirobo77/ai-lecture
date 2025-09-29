@@ -8,6 +8,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from shared.config import validate_api_keys
+from shared.utils import ChromaUtils
 from agents.intent_classifier import IntentClassifier
 from agents.weather_agent import WeatherAgent
 from agents.calendar_agent import CalendarAgent

@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from shared.config import validate_api_keys, OPENAI_API_KEY, CHAT_MODEL
-from shared.utils import ChatUtils
+from shared.utils import ChatUtils, ChromaUtils
 import json
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
