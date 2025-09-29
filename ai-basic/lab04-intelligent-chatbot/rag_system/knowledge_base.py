@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from shared.config import OPENAI_API_KEY, CHAT_MODEL
-from shared.utils import EmbeddingUtils
+from shared.utils import EmbeddingUtils, ChromaUtils
 
 class KnowledgeBase:
     """RAG 지식베이스 관리자"""
