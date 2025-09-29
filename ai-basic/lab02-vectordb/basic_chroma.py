@@ -307,7 +307,11 @@ def demonstrate_persistence():
     
     # 메모리 클라이언트 생성
     memory_client = setup_chroma_client(use_persistence=False)
-    memory_collection = memory_client.create_collection("temp_collection")
+    openai_ef = ChromaUtils.create_openai_embedding_function()
+    memory_collection = memory_client.create_collection(
+        "temp_collection", 
+        embedding_function=openai_ef
+    )
     
     memory_collection.add(
         documents=["임시 문서입니다."],

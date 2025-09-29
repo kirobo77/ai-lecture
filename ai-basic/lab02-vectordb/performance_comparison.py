@@ -7,9 +7,14 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# ChromaDB 텔레메트리 비활성화 (반복적인 컬렉션 생성으로 인한 텔레메트리 재시도 방지)
+os.environ['CHROMA_ANALYTICS'] = 'false'
+os.environ['ANONYMIZED_TELEMETRY'] = 'false'  
+os.environ['CHROMA_TELEMETRY_DISABLED'] = 'true'
+
 import chromadb
 from shared.config import validate_api_keys, CHROMA_PERSIST_DIRECTORY
-from shared.utils import EmbeddingUtils
+from shared.utils import EmbeddingUtils, ChromaUtils
 import time
 import random
 import psutil
@@ -34,10 +39,17 @@ class PerformanceBenchmark:
     def setup_memory_client(self, collection_name: str = "memory_test"):
         """메모리 기반 클라이언트 설정"""
         client = chromadb.Client()
+        openai_ef = ChromaUtils.create_openai_embedding_function()
         try:
-            collection = client.create_collection(collection_name)
+            collection = client.create_collection(
+                collection_name, 
+                embedding_function=openai_ef
+        )
         except Exception:
-            collection = client.get_collection(collection_name)
+            collection = client.get_collection(
+                collection_name,
+                embedding_function=openai_ef
+            )
         return client, collection
     
     def setup_disk_client(self, collection_name: str = "disk_test", 
@@ -47,10 +59,24 @@ class PerformanceBenchmark:
             persist_directory = CHROMA_PERSIST_DIRECTORY
         
         client = chromadb.PersistentClient(path=persist_directory)
+        openai_ef = ChromaUtils.create_openai_embedding_function()
+
         try:
-            collection = client.create_collection(collection_name)
-        except Exception:
-            collection = client.get_collection(collection_name)
+            collection = client.create_collection(
+                collection_name,
+                embedding_function=openai_ef
+            )
+        except Exception as e:
+            # 이미 존재하면 삭제 후 재생성
+            try:
+                client.delete_collection(collection_name)
+                collection = client.create_collection(
+                    collection_name,
+                    embedding_function=openai_ef
+                )
+            except Exception:
+                # 그래도 안 되면 get (임베딩 함수 없이)
+                collection = client.get_collection(collection_name)
         return client, collection
     
     def generate_test_documents(self, num_docs: int) -> List[Dict[str, Any]]:
@@ -254,10 +280,18 @@ def compare_memory_vs_disk():
                 "disk_usage": disk_usage['disk_usage_mb']
             }
         })
-        
-        # 임시 디렉토리 정리
+
+        # 임시 디렉토리 정리 전에 클라이언트 참조 제거
+        del disk_collection
+        del disk_client
+        time.sleep(0.5)  # 파일 핸들 해제 대기
+
         if os.path.exists(disk_dir):
-            shutil.rmtree(disk_dir)
+            try:
+                shutil.rmtree(disk_dir)
+            except PermissionError:
+                # Windows에서 즉시 삭제 안 되면 무시
+                print(f"  (임시 파일 삭제 지연: {disk_dir})")
     
     return comparison_results
 
@@ -312,7 +346,7 @@ def benchmark_different_batch_sizes():
     benchmark = PerformanceBenchmark()
     documents = benchmark.generate_test_documents(1000)
     
-    batch_sizes = [10, 25, 50, 100, 200, 500]
+    batch_sizes = [10, 25, 50, 100, 200] # 500 제거 (kt 보안 정책에서 대용량 업로드 감지당함)
     batch_results = []
     
     for batch_size in batch_sizes:
