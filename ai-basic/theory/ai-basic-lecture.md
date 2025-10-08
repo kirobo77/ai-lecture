@@ -138,9 +138,14 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
 - Transformer는 여러 개의 Transformer Block이 순차적으로 연결되어 구성
 - 각 Block은 크게 **Attention Component와 Feed-forward Network로 나뉨**
 
+##### 데이터 흐름
+```
+Positional Encoding → Multi-Head Attention → Feed-Forward Network
+```
+
 ##### Positional Encoding: 순서 정보 추가
 - Transformer는 **순차 정보가 없기 때문에, sin/cos positional encoding을 통해 토큰의 순서를 Embedding 벡터에 더함**
-- 이는 Attention과 FFN을 설명하기 위한 전제 조건으로, 각 Transformer Block에 들어가는 입력에 포함됨
+- 이는 각 Transformer Block에 들어가는 입력에 포함되는 전처리 단계
 
 ##### Multi-Head Attention: 여러 관점에서 보기
 
@@ -312,7 +317,7 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 | **학습 방식** | Masked Language Modeling | Next Token Prediction |
 | **주요 용도** | 이해 (Understanding) | 생성 (Generation) |
 | **Attention** | Self-attention (양방향) | Masked self-attention (단방향) |
-| **문맥 접근** | 전체 문장 동시 접근 | 이전 토큰만 접근 |
+| **문맥 접근** | 전체 문장 동시 접근 | 이전 토큰만 접근 (하지만 이미 생성된 토큰들은 병렬 처리) |
 
 ##### 학습 방식의 차이
 
