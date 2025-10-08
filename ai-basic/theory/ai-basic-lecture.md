@@ -107,35 +107,138 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
 
 ---
 
-#### 1.6 Trasnformer란 무엇인가?
+#### 1.6 Transformer란 무엇인가?
 
-- 모델 구성
-  - Transformer는 여러 개의 Transformer Block이 순차적으로 연결되어 구성
-  - 각 Block은 크게 **Attention Component와 Feed-forward Network로 나뉨**
+##### 📌 Transformer 이전: RNN/LSTM의 한계
 
-- **Attention**
-  - **문맥 이해를 위해 각 단어가 문장 내 다른 단어와의 관계를 파악**
-    - 예: "bank"는 "river"와 "money"를 문맥에 따라 다른 의미를 갖게 됨
+```
+[기존 방식: RNN/LSTM]
+입력: "나는 사과를 좋아한다"
 
-  - **Scaled dot-product 방식을 사용해, softmax를 통해 중요도 가중치를 계산**
-  - Multi-head attention: 여러 개의 헤드로 병렬 처리하며, 문법, 의미, 위치 관계를 동시에 파악
+처리 방식: 나는 → 사과를 → 좋아한다 (순차 처리)
+           ↓      ↓        ↓
+문제점 1: 느림 (병렬 처리 불가)
+문제점 2: 앞 단어 기억 못함 (장기 의존성 문제)
+```
 
-- **Feed-forward Network**
-  - attention 출력을 각 위치마다 추가 처리를 하는 MLP 구조
-  - 일반적으로 hidden 크기는 embedding 크기의 4배로 설정
+##### 🚀 Transformer의 핵심 아이디어: "한 번에 전체를 본다"
+```
+[Transformer 방식]
+입력: "나는 사과를 좋아한다"
 
-- Positional Encoding
-  - Trasnformer는 **순차 정보가 없기 때문에, sin/cos positional encoding을 통해 토큰의 순서를 Embedding 벡터에 더함**
+처리 방식: 4개 단어를 동시에 처리!
+           나는 ←→ 사과를 ←→ 좋아한다
+           (모든 단어가 서로를 본다)
+           
+장점 1: 빠름 (병렬 처리 가능)
+장점 2: 문맥 파악 정확 (전체를 한눈에)
+```
 
-- Encoder-Decoder 구조
-  - Encoder: 여러 Block 쌓아 입력 토큰 전체의 문맥적 표현 생성
-  - Decoder:
-    - 마스크된 self-attention을 사용해 이전 출력 토큰만 참조
-    - encoder 출력과 cross-attention을 수행하여 각 단계 예측에 활용
+##### 모델 구성
+- Transformer는 여러 개의 Transformer Block이 순차적으로 연결되어 구성
+- 각 Block은 크게 **Attention Component와 Feed-forward Network로 나뉨**
 
-- Residual 연결 및 정규화
-  - 각 서브레이어(attention -> feed-forward) 후, residual 연결 + LayerNorm을 적용
-  - 초기 Transformer는 post-LN을 사용했지만, 이후 pre-LN 방식이 더 안정적으로 사용
+##### Positional Encoding: 순서 정보 추가
+- Transformer는 **순차 정보가 없기 때문에, sin/cos positional encoding을 통해 토큰의 순서를 Embedding 벡터에 더함**
+- 이는 Attention과 FFN을 설명하기 위한 전제 조건으로, 각 Transformer Block에 들어가는 입력에 포함됨
+
+##### Multi-Head Attention: 여러 관점에서 보기
+
+**핵심 개념**:
+- **문맥 이해를 위해 각 단어가 문장 내 다른 단어와의 관계를 파악**
+- **Scaled dot-product 방식을 사용해, softmax를 통해 중요도 가중치를 계산**
+- 여러 개의 헤드로 병렬 처리하며, 문법, 의미, 위치 관계를 동시에 파악
+
+**비유와 예시**:
+```
+같은 문장을 3명이 동시에 분석:
+
+헤드1: 문법 관계 파악 (주어-동사)
+헤드2: 의미 관계 파악 (은행-돈)
+헤드3: 위치 관계 파악 (가까운 단어)
+
+→ 3명의 의견 종합 → 더 정확한 이해!
+
+실제 GPT-3: 96개 헤드가 동시에 분석
+```
+
+**실무 예시**:
+- 예: "bank"는 "river"와 "money"를 문맥에 따라 다른 의미를 갖게 됨
+
+##### Feed-Forward Network: 정보 재가공
+
+**핵심 개념**:
+- attention 출력을 각 위치마다 추가 처리를 하는 MLP 구조
+- 일반적으로 hidden 크기는 embedding 크기의 4배로 설정
+
+**비유**: 재료를 더 풍부하게 만드는 과정
+
+```
+[과정]
+입력 정보 (768차원)
+    ↓ 확장
+중간 처리 (3072차원) ← 4배 확장!
+    ↓ 압축
+출력 정보 (768차원)
+
+왜?: 정보를 확장했다 압축하면서 
+     더 풍부한 의미 표현 생성
+```
+
+**실무 팁**: 
+- 보통 임베딩 크기의 4배로 확장 (768 → 3072)
+- 왜 4배? → 실험적으로 가장 성능 좋았음
+- 각 단어(토큰)마다 독립적으로 처리됨
+
+##### Encoder-Decoder 구조
+- **Encoder**: 여러 Block 쌓아 입력 토큰 전체의 문맥적 표현 생성
+- **Decoder**:
+  - 마스크된 self-attention을 사용해 이전 출력 토큰만 참조
+  - encoder 출력과 cross-attention을 수행하여 각 단계 예측에 활용
+
+##### 안정적 학습을 위한 안전장치
+
+###### Residual Connection (지름길)
+
+**문제**:
+```
+Block 1 → Block 2 → ... → Block 12
+          ↓ 정보가 점점 손실됨
+```
+
+**해결**:
+```
+Block 1 ──→ Block 2 ──→ Block 12
+  └─────────┴──────────┘
+        (지름길 추가)
+
+→ 원본 정보도 같이 전달!
+→ 정보 손실 방지
+```
+
+###### Layer Normalization (값 조정)
+
+**문제**:
+```
+Block 통과할수록 값이 너무 커지거나 작아짐
+→ 학습 불안정
+→ Gradient 폭발/소실
+```
+
+**해결**:
+```
+매 Block마다 값의 범위를 일정하게 조정
+→ 안정적 학습 가능
+→ 깊은 모델도 학습 가능
+```
+
+**실무 노하우**:
+- **Post-LN** (초기 방식): Block 처리 → Normalization
+- **Pre-LN** (요즘 방식): Normalization → Block 처리 ← GPT-3, PaLM 사용
+- Pre-LN이 큰 모델에서 훨씬 안정적!
+
+- 각 서브레이어(attention -> feed-forward) 후, residual 연결 + LayerNorm을 적용
+- 초기 Transformer는 post-LN을 사용했지만, 이후 pre-LN 방식이 더 안정적으로 사용
 
 - 본 구조는 BERT, GPT, Claude, Gemini 등 수많은 모델의 기반이 됨
 
