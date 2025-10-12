@@ -257,7 +257,10 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
   - **RNN, LSTM**, GRU: 시퀀스 처리
   - CNN: 문장 분류
   - **Autoencoder** / Seq2Seq: 번역, 요약 등
-  - **Transformer: 현재 NLP 모델의 중심 구조**(GPT, BERT)
+  - **Transformer**: 현재 NLP 모델의 중심 구조
+    - Self-Attention으로 병렬 처리 가능
+    - 장거리 의존성 문제 해결
+    - 대표 아키텍처: BERT (인코더), GPT (디코더)
 
 ---
 
