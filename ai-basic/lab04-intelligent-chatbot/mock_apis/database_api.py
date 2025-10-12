@@ -367,7 +367,7 @@ async def get_database_stats():
 
 if __name__ == "__main__":
     import uvicorn
-    print("🗄️  Database Mock API 서버 시작...")
-    print("📊 사용 가능한 테이블:", list(mock_tables.keys()))
-    print("🔗 API 문서: http://localhost:8005/docs")
+    print("  Database Mock API 서버 시작...")
+    print(" 사용 가능한 테이블:", list(mock_tables.keys()))
+    print(" API 문서: http://localhost:8005/docs")
     uvicorn.run(app, host="0.0.0.0", port=8005) 

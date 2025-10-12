@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from shared.config import validate_api_keys, OPENAI_API_KEY, CHAT_MODEL
-from shared.utils import ChatUtils
+from shared.utils import ChatUtils, ChromaUtils
 import json
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
@@ -30,11 +30,8 @@ class IntentClassifier:
         # ChromaDB 클라이언트 설정
         self.chroma_client = chromadb.PersistentClient(path="./data/intent_db")
         
-        # OpenAI 임베딩 함수 설정
-        self.openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-            api_key=OPENAI_API_KEY,
-            model_name="text-embedding-ada-002"
-        )
+        # OpenAI 임베딩 함수 설정 (SSL 검증 비활성화)
+        self.openai_ef = ChromaUtils.create_openai_embedding_function()
         
         # 의도 분석 지식베이스 초기화
         self.initialize_knowledge_base()

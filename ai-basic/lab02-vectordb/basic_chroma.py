@@ -9,9 +9,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import chromadb
 from chromadb.config import Settings
-from chromadb.utils import embedding_functions
 from shared.config import validate_api_keys, CHROMA_PERSIST_DIRECTORY, CHROMA_COLLECTION_NAME, OPENAI_API_KEY
-from shared.utils import EmbeddingUtils
+from shared.utils import EmbeddingUtils, ChromaUtils
 import time
 from typing import List, Dict, Any
 
@@ -54,11 +53,8 @@ def create_collection(client, collection_name=None, reset=False):
         except Exception as e:
             print(f"컬렉션 삭제 실패 (존재하지 않을 수 있음): {e}")
     
-    # OpenAI 임베딩 함수 설정
-    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-        api_key=OPENAI_API_KEY,
-        model_name="text-embedding-ada-002"
-    )
+    # OpenAI 임베딩 함수 설정 (SSL 검증 비활성화)
+    openai_ef = ChromaUtils.create_openai_embedding_function()
     
     # 컬렉션 생성 또는 가져오기
     try:
@@ -311,7 +307,11 @@ def demonstrate_persistence():
     
     # 메모리 클라이언트 생성
     memory_client = setup_chroma_client(use_persistence=False)
-    memory_collection = memory_client.create_collection("temp_collection")
+    openai_ef = ChromaUtils.create_openai_embedding_function()
+    memory_collection = memory_client.create_collection(
+        "temp_collection", 
+        embedding_function=openai_ef
+    )
     
     memory_collection.add(
         documents=["임시 문서입니다."],

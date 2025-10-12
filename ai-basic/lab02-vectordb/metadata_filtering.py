@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import chromadb
 from shared.config import validate_api_keys, CHROMA_PERSIST_DIRECTORY
-from shared.utils import EmbeddingUtils
+from shared.utils import EmbeddingUtils, ChromaUtils  
 import time
 import random
 from typing import List, Dict, Any, Optional
@@ -29,6 +29,9 @@ class AdvancedSearchEngine:
         print("고급 검색 엔진 초기화")
         print("=" * 40)
         
+        # OpenAI 임베딩 함수 설정 추가
+        openai_ef = ChromaUtils.create_openai_embedding_function()
+
         if reset:
             try:
                 self.client.delete_collection(self.collection_name)
@@ -39,13 +42,17 @@ class AdvancedSearchEngine:
         try:
             self.collection = self.client.create_collection(
                 name=self.collection_name,
+                embedding_function=openai_ef,
                 metadata={"description": "고급 메타데이터 검색용 컬렉션"}
             )
             print(f"새 컬렉션 '{self.collection_name}' 생성됨")
         except Exception:
-            self.collection = self.client.get_collection(self.collection_name)
+            self.collection = self.client.get_collection(
+                self.collection_name,
+                embedding_function=openai_ef
+            )
             print(f"기존 컬렉션 '{self.collection_name}' 로드됨")
-        
+
         print(f"컬렉션 문서 수: {self.collection.count()}")
     
     def add_documents(self, documents: List[Dict[str, Any]]):

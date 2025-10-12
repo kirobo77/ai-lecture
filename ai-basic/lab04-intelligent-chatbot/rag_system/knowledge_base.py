@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from shared.config import OPENAI_API_KEY, CHAT_MODEL
-from shared.utils import EmbeddingUtils
+from shared.utils import EmbeddingUtils, ChromaUtils
 
 class KnowledgeBase:
     """RAG 지식베이스 관리자"""
@@ -26,11 +26,8 @@ class KnowledgeBase:
         # ChromaDB 클라이언트 설정
         self.chroma_client = chromadb.PersistentClient(path=persist_directory)
         
-        # OpenAI 임베딩 함수 설정
-        self.openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-            api_key=OPENAI_API_KEY,
-            model_name="text-embedding-ada-002"
-        )
+        # OpenAI 임베딩 함수 설정 (SSL 검증 비활성화)
+        self.openai_ef = ChromaUtils.create_openai_embedding_function()
         
         # 컬렉션들
         self.collections = {}

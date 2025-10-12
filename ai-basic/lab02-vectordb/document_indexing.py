@@ -47,10 +47,15 @@ class DocumentIndexer:
             except Exception as e:
                 print(f"컬렉션 삭제 실패: {e}")
         
+        # SSL 우회 임베딩 함수 추가
+        from shared.utils import ChromaUtils
+        openai_ef = ChromaUtils.create_openai_embedding_function()
+        
         # 컬렉션 생성 또는 가져오기
         try:
             self.collection = self.client.create_collection(
                 name=self.collection_name,
+                embedding_function=openai_ef,
                 metadata={"description": "대용량 문서 인덱싱용 컬렉션"}
             )
             print(f"새 컬렉션 '{self.collection_name}' 생성됨")

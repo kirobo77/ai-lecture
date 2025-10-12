@@ -9,9 +9,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
 import chromadb
-from chromadb.utils import embedding_functions
 from shared.config import validate_api_keys, CHROMA_PERSIST_DIRECTORY, OPENAI_API_KEY, CHAT_MODEL
-from shared.utils import EmbeddingUtils, ChatUtils
+from shared.utils import EmbeddingUtils, ChatUtils, ChromaUtils
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go

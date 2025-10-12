@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import chromadb
 from chromadb.utils import embedding_functions
 from shared.config import validate_api_keys, CHROMA_PERSIST_DIRECTORY, OPENAI_API_KEY, CHAT_MODEL
-from shared.utils import EmbeddingUtils, ChatUtils
+from shared.utils import EmbeddingUtils, ChatUtils, ChromaUtils
 import numpy as np
 import time
 import re
@@ -135,10 +135,7 @@ class HybridRetriever:
         try:
             self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIRECTORY)
             
-            openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=OPENAI_API_KEY,
-                model_name="text-embedding-ada-002"
-            )
+            openai_ef = ChromaUtils.create_openai_embedding_function()
             
             try:
                 self.collection = self.client.get_collection(

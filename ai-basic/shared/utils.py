@@ -10,6 +10,11 @@ from typing import List, Dict, Any, Optional, Union
 from sklearn.metrics.pairwise import cosine_similarity
 import tiktoken
 import time
+import httpx
+import os
+import ssl
+import urllib3
+from chromadb.utils import embedding_functions
 try:
     # lab 파일에서 실행될 때
     from shared.config import *
@@ -17,12 +22,35 @@ except ImportError:
     # shared 디렉토리에서 직접 실행될 때
     from config import *
 
+# SSL 검증 비활성화 설정 (사내망 환경용)
+os.environ['CURL_CA_BUNDLE'] = ''
+os.environ['REQUESTS_CA_BUNDLE'] = ''
+os.environ['SSL_VERIFY'] = 'false'
+os.environ['PYTHONHTTPSVERIFY'] = '0'
+os.environ['CHROMA_ANALYTICS'] = 'false'  # ChromaDB 텔레메트리 비활성화
+# posthog.com 전송 실패 로그 안보이기 위한 세팅
+os.environ['ANONYMIZED_TELEMETRY'] = 'false'
+os.environ['CHROMA_TELEMETRY_DISABLED'] = 'true'
+
+# urllib3 경고 비활성화
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+urllib3.disable_warnings()
+
 # 로깅 설정
 logging.basicConfig(level=getattr(logging, LOG_LEVEL))
 logger = logging.getLogger(__name__)
 
+# 특정 로거들의 레벨을 높여서 경고 숨기기
+logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
+logging.getLogger('backoff').setLevel(logging.ERROR)
+logging.getLogger('chromadb.telemetry.product.posthog').setLevel(logging.ERROR)
+logging.getLogger('httpx').setLevel(logging.WARNING)
+
+# SSL 검증 비활성화 HTTP 클라이언트 생성
+no_ssl_httpx = httpx.Client(verify=False)
+
 # OpenAI 클라이언트 초기화
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY, http_client=no_ssl_httpx)
 
 class EmbeddingUtils:
     """임베딩 관련 유틸리티 클래스"""
@@ -154,6 +182,54 @@ class ChatUtils:
             logger.error(f"채팅 응답 생성 실패: {e}")
             raise
 
+class ChromaUtils:
+    """ChromaDB 관련 유틸리티 클래스"""
+
+    @staticmethod
+    def create_openai_embedding_function(api_key: str = OPENAI_API_KEY,
+                                       model_name: str = "text-embedding-ada-002"):
+        """SSL 검증 비활성화된 OpenAI 임베딩 함수 생성"""
+        try:
+            # 사내망 환경을 위한 추가 설정
+            import openai
+            
+            # OpenAI 클라이언트 직접 설정으로 우회
+            class CustomOpenAIEmbeddingFunction:
+                def __init__(self, api_key, model_name):
+                    self.api_key = api_key
+                    self.model_name = model_name
+                    self.client = OpenAI(api_key=api_key, http_client=no_ssl_httpx)
+                
+                def name(self):
+                    return f"openai-{self.model_name}"
+
+                def __call__(self, input):
+                    if isinstance(input, str):
+                        input = [input]
+                    
+                    response = self.client.embeddings.create(
+                        input=input,
+                        model=self.model_name
+                    )
+                    return [data.embedding for data in response.data]
+                
+                def embed_query(self, input):
+                    """단일 쿼리 임베딩 - ChromaDB 1.1.0에서 필요"""
+                    if isinstance(input, list):
+                        return self.__call__(input)
+                    else:
+                        return self.__call__([input])[0]
+            
+            return CustomOpenAIEmbeddingFunction(api_key, model_name)
+            
+        except Exception as e:
+            logger.warning(f"Custom embedding function 생성 실패, 기본값 사용: {e}")
+            # 기본 ChromaDB 임베딩 함수 사용
+            return embedding_functions.OpenAIEmbeddingFunction(
+                api_key=api_key,
+                model_name=model_name
+            )
+
 class PerformanceUtils:
     """성능 측정 유틸리티 클래스"""
     
@@ -186,7 +262,7 @@ def print_progress(current: int, total: int, prefix: str = "Progress"):
     percent = (current / total) * 100
     bar_length = 30
     filled_length = int(bar_length * current // total)
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+    bar = '#' * filled_length + '-' * (bar_length - filled_length)
     print(f'\r{prefix}: |{bar}| {percent:.1f}% ({current}/{total})', end='')
     if current == total:
         print()  # 완료 시 새 줄

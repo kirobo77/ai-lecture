@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import chromadb
 from chromadb.utils import embedding_functions
 from shared.config import validate_api_keys, CHROMA_PERSIST_DIRECTORY, OPENAI_API_KEY, CHAT_MODEL, TEMPERATURE
-from shared.utils import EmbeddingUtils, ChatUtils
+from shared.utils import EmbeddingUtils, ChatUtils, ChromaUtils
 import time
 import json
 from typing import List, Dict, Any, Optional, Tuple
@@ -92,11 +92,8 @@ class DocumentRetriever:
         try:
             self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIRECTORY)
             
-            # OpenAI 임베딩 함수 설정
-            openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=OPENAI_API_KEY,
-                model_name="text-embedding-ada-002"
-            )
+            # OpenAI 임베딩 함수 설정 (SSL 검증 비활성화)
+            openai_ef = ChromaUtils.create_openai_embedding_function()
             
             # 컬렉션 가져오기 또는 생성
             try:
