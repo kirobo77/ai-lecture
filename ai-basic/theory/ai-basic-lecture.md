@@ -2016,11 +2016,56 @@ for each_level_up_path in candidate_paths:
   - **Model Context Protocol(MCP)**은 Anthropic이 2024년 11월에 공개한 **오픈 표준(OSS)** 프로토콜이며, AI 모델(LLM)과 외부 시스템 간 **표준화된 연결을 제공하는 통신 프로토콜**
   - USB-C 포트처럼, AI 애플리케이션이 다양한 도구와 데이터 소스로 **동일한 방식으로 연결 가능**하게 해주는 범용 인터페이스
   - 기존의 N×M 개별 통합을 MCP 하나의 인터페이스로 대체해 **확장성과 유지보수성을 향상**
+
+![N×M 인터페이스 시각화](./assets/N×M-interface.png)
+
   - **Language Server Protocol (LSP)**의 메시지 흐름 아이디어를 의도적으로 재사용하며, **JSON-RPC 2.0** 위에서 전송
-- 주요 플랫폼 채택 현황
+
+- 왜 MCP가 필요한가?
+
+  **기존 방식의 문제점**
+  - AI 애플리케이션마다 각 외부 도구와 개별적으로 연동 구현 필요
+  - 예시: Claude 앱이 Notion, Slack, GitHub, Google Drive와 연동하려면?
+    - Notion API 연동 코드 작성
+    - Slack API 연동 코드 작성
+    - GitHub API 연동 코드 작성
+    - Google Drive API 연동 코드 작성
+  - **문제**: N개 AI 앱 × M개 도구 = N×M개의 개별 연동 코드 필요
+  - 결과: 유지보수 지옥, 중복 코드, 확장 어려움
+
+  **MCP 방식의 해결책**
+  - 각 도구는 **MCP 서버 하나만** 구현
+  - 각 AI 앱은 **MCP 클라이언트 하나만** 구현
+  - N개 AI 앱 × M개 도구 = **N + M개의 구현**으로 축소
+  - 새 도구 추가 시: MCP 서버만 만들면 모든 AI 앱에서 즉시 사용 가능
+  - 새 AI 앱 추가 시: MCP 클라이언트만 구현하면 모든 도구 즉시 사용 가능
+
+  **핵심 가치**
+  - **재사용성**: 한 번 만든 MCP 서버를 모든 AI 앱에서 사용
+  - **표준화**: 모든 연동이 동일한 방식으로 작동
+  - **확장성**: 새로운 도구/앱 추가가 간단함
+  - **유지보수성**: 변경 사항이 한 곳에만 반영되면 됨
+
+- 주요 플랫폼 채택 현황 및 생태계 확장
+
+  **주요 AI 플랫폼**
   - **OpenAI**: 2025년 3월 공식 채택 발표. Agents SDK, ChatGPT 데스크톱 앱, Responses API에 MCP 지원 통합
   - **Google DeepMind**: 2025년 4월 Gemini 모델과 SDK에 MCP 지원 추가 발표. CEO Demis Hassabis는 "AI 에이전트 시대의 급속히 성장하는 오픈 표준"이라고 언급
   - **Microsoft**: Copilot Studio와 Azure AI Foundry에서 MCP 지원
+
+  **MCP 생태계의 폭발적 성장**
+  - 2025년 2월 기준 **1,000개 이상의 MCP 서버** 존재
+  - 주요 자동화/통합 플랫폼: Zapier (30,000+ 액션), Make.com, n8n
+  - 엔터프라이즈 서비스: AWS (Lambda, ECS, EKS), Block (60개 이상 MCP 서버), Asana
+  - 개발 도구: Replit, Sourcegraph, Codeium, Zed
+  - 대부분의 SaaS 서비스가 MCP 서버를 제공하거나 준비 중
+
+  **실무적 의미**
+  - 개발자는 **직접 API 연동 코드를 작성할 필요 없이**, MCP 서버만 연결하면 즉시 사용 가능
+  - 예시: Notion, Slack, GitHub, Google Drive 등을 코드 없이 AI 앱에 통합
+  - 실제로 워크플로우 자동화 플랫폼인 **n8n, Make.com도 MCP를 통해 서비스 간 연결**
+    - AI 에이전트가 MCP로 n8n 워크플로우를 트리거하고, n8n이 다시 MCP로 외부 도구 호출
+    - 복잡한 통합 작업을 코드 없이 구성 가능
 
 ---
 
@@ -2034,6 +2079,54 @@ for each_level_up_path in candidate_paths:
   | MCP Client      | Host 내부의 MCP 프로토콜 구현체, JSON-RPC 메시지를 생성하고 서버와 통신 | Anthropic의 Python/TypeScript SDK, OpenAI Agents SDK의 MCP 모듈, 개발자가 구현한 MCP 클라이언트 라이브러리 |
   | MCP Server      | 실제 도구와 데이터를 제공하는 백엔드 서비스, 특정 기능(파일 접근, API 호출 등)을 MCP 프로토콜로 노출 | GitHub MCP Server (레포지토리 관리), Slack MCP Server (메시지 전송), Filesystem MCP Server (로컬 파일 작업), PostgreSQL MCP Server (DB 쿼리) |
   | Transport Layer | 실제 데이터가 오가는 통신 계층, JSON-RPC 2.0 메시지를 전송하는 방식 | **stdio**: 로컬 프로세스와 파이프로 통신, **HTTP/SSE**: 원격 서버와 웹 프로토콜로 통신, **WebSocket**: 실시간 양방향 통신 |
+
+- MCP 아키텍처 전체 구조
+
+  ```
+  ┌──────────────────────────────────────────────────────────┐
+  │                    사용자 (User)                          │
+  │              "GitHub 이슈를 Slack으로 보내줘"              │
+  └────────────────────────┬─────────────────────────────────┘
+                           ↓
+  ┌─────────────────────────────────────────────────────────┐
+  │             MCP Host (AI Application)                    │
+  │         예: Claude Desktop, ChatGPT, 커스텀 AI 앱        │
+  │  ┌───────────────────────────────────────────────────┐  │
+  │  │      MCP Client (Protocol Implementation)         │  │
+  │  │  - JSON-RPC 메시지 생성                           │  │
+  │  │  - 여러 MCP Server와 통신 관리                    │  │
+  │  │  - 도구 응답을 AI에게 전달                        │  │
+  │  └────┬──────────────┬──────────────┬─────────────┬──┘  │
+  └───────┼──────────────┼──────────────┼─────────────┼─────┘
+          ↓              ↓              ↓             ↓
+     ┌─────────┐    ┌─────────┐   ┌─────────┐   ┌─────────┐
+     │ GitHub  │    │  Slack  │   │ Notion  │   │  기타   │
+     │  MCP    │    │  MCP    │   │  MCP    │   │  MCP    │
+     │ Server  │    │ Server  │   │ Server  │   │ Server  │
+     └────┬────┘    └────┬────┘   └────┬────┘   └────┬────┘
+          ↓              ↓              ↓             ↓
+     [GitHub API]   [Slack API]   [Notion API]   [Custom API]
+
+
+  핵심 포인트:
+  - MCP Client는 1개만 구현하면 모든 MCP Server 사용 가능
+  - 각 MCP Server는 독립적으로 개발/배포
+  - N×M 통합 문제가 N+M으로 축소됨
+  ```
+
+- 무엇을 구현해야 하는가?
+
+  **상황별 구현 가이드**
+
+  | 역할 | 구현 대상 | 예시 | 설명 |
+  |------|---------|------|------|
+  | **AI 앱 개발자** | MCP Client만 구현 | AI 챗봇, 에이전트 시스템 | 기존 MCP 서버(Notion, Slack 등)를 사용하기만 함 |
+  | **도구/서비스 제공자** | MCP Server 구현 | 사내 ERP, 독자적 SaaS | 자신의 서비스를 AI 앱들에게 제공 |
+  | **플랫폼 사업자** | Client + Server 모두 | n8n, Make.com | 외부 도구 사용 + 자신의 기능 제공 |
+
+  **실무 팁**
+  - 대부분의 경우 **MCP Client만 구현**하면 충분 (이미 1,000개 이상의 서버 존재)
+  - 특수한 경우에만 Server 구현 필요: 사내 전용 시스템, 독자적 서비스, 특수 도메인 도구
 
 - 주요 기능
 
