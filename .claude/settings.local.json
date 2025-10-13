@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\Users\\sjh-s\\OneDrive\\바탕 화면\\edu\\lecture\" push --force)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
