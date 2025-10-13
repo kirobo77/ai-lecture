@@ -277,7 +277,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
 
 #### 1.7 Transformer란 무엇인가?
 
-##### 📌 Transformer 이전: RNN/LSTM의 한계
+##### Transformer 이전: RNN/LSTM의 한계
 
 ```
 [기존 방식: RNN/LSTM]
@@ -289,7 +289,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
 문제점 2: 앞 단어 기억 못함 (장기 의존성 문제)
 ```
 
-##### 🚀 Transformer의 핵심 아이디어: "한 번에 전체를 본다"
+##### Transformer의 핵심 아이디어: "한 번에 전체를 본다"
 ```
 [Transformer 방식]
 입력: "나는 사과를 좋아한다"
@@ -816,7 +816,7 @@ Block 통과할수록 값이 너무 커지거나 작아짐
      - 모델에게 예시를 여러 개 보여주고, 마지막 항목만 추론하게 함
 
      - 예시:
-       ```tex
+       ```text
        Q: 서울은 한국의 수도이다. → True  
        Q: 파리는 미국의 수도이다. → False  
        Q: 도쿄는 일본의 수도이다. → 
@@ -830,7 +830,7 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 
      - "생각하는 과정을 먼저 보여줘"식 프롬프트
 
-       ```tex
+       ```text
        Q: 철수는 영희보다 키가 크다. 영희는 민수보다 작다. 누가 제일 클까?  
        A: 단계별로 생각해보자. 영희 < 철수, 영희 < 민수 → 철수와 민수 중 비교해야 한다...  
        ```
@@ -841,7 +841,7 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 
      - 모델에게 역할을 명확하게 부여하면, 응답 품질이 크게 향상됨
 
-       ```tex
+       ```text
        너는 지금부터 노련한 IT 컨설턴트야. 고객의 요구사항을 정리해서 비즈니스 요건으로 바꿔줘.
        ```
 
@@ -874,9 +874,9 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 
 - 모델이 똑똑해졌어도 **모호한 요청은 여러 가지로 해석 가능**
 - 예시 비교:
-  - ❌ 모호한 프롬프트: "보고서 작성해줘"
+  - 모호한 프롬프트: "보고서 작성해줘"
     - 어떤 주제? 어떤 형식? 분량은? → 모델이 추측해서 작성
-  - ✅ 명확한 프롬프트: "2024년 1분기 마케팅 성과 분석 보고서를 표와 그래프 포함해서 3페이지 분량으로 작성해줘"
+  - 명확한 프롬프트: "2024년 1분기 마케팅 성과 분석 보고서를 표와 그래프 포함해서 3페이지 분량으로 작성해줘"
     - 주제, 형식, 분량 명확 → 원하는 결과에 가까워짐
 
 **질문 분해(Question Decomposition) 전략**
@@ -993,7 +993,7 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 
   - 예시:
 
-    ```tex
+    ```text
     요약: 이 문서는 고객 만족도 향상 전략에 대해 설명합니다.
     키워드: 고객 경험, 응답 시간, 피드백 루프
     ```
@@ -1368,7 +1368,7 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 
 ##### RAG Pipeline
 
-```tex
+```text
 [문서 수집] → [청킹] → [임베딩] → [벡터 DB 저장]
                                   ↓
 [사용자 요청] → [임베딩] → [유사도 검색] → [컨텍스트 구성] → [LLM 응답 생성]
@@ -1376,12 +1376,12 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 
 ##### 단계 설명
 
-- **문서 수집**: Web crawler, API, DB dump, pdf, html, markdown 등의 정규과 비정형 데이터를 수집
+- **문서 수집**: Web crawler, API, DB dump, pdf, html, markdown 등의 정형과 비정형 데이터를 수집
 - **Chunking(청킹)**: 문서를 특정 토큰 길이로 조각화
-- **Embedding(임베딩)**: 문서 청킹을 벡터 공간으로 경본화(BERT, Ada-002, SBERT 등 사용)
+- **Embedding(임베딩)**: 문서 청킹을 벡터 공간으로 변환(BERT, Ada-002, SBERT 등 사용)
 - **벡터 DB 저장**: FAISS, Pinecone, Weaviate, Qdrant 등
 - **사용자 요청 임베딩**: 사용자의 요청 작업을 embedding
-- **유사도 검색**: Approximate Nearest Neighbor(ANN)을 통해 바로가지 유사한 청킹 데이터 검색
+- **유사도 검색**: Approximate Nearest Neighbor(ANN)을 통해 가장 유사한 청킹 데이터 검색
 - **컨텍스트 구성**: 검색 결과를 합치고 LLM에서 사용할 추가 컨텍스트로 조합
 - **LLM의 응답**: 설정된 Prompt 보고 답변 생성(출처 인용 포함 가능)
 
@@ -1857,7 +1857,7 @@ Agentic RAG는 3.3에서 다룬 검색 최적화 기법들과 근본적으로 �
     - 다중 검증: 다양한 소스로 검증
     - Human-in-the-loop: 중요한 판단에 인간 개입 가능화
   - 성능 지표
-    - Task Completion Rate(작업 완료율
+    - Task Completion Rate(작업 완료율)
     - Accuracy(정확도)
     - Efficiency(효율성)
     - User Satisfaction(사용자 만족도)
@@ -1905,7 +1905,7 @@ Agentic RAG는 3.3에서 다룬 검색 최적화 기법들과 근본적으로 �
     | 방식             | 특징                                                   |
     | ---------------- | ------------------------------------------------------ |
     | 중앙 집중형 조정 | 오케스트레이터 또는 마스터 에이전트가 전체 시스템 관리 |
-    | 분산현 조정      | 각 에이전트가 자율적 결정을 내리고 협상을 통해 조정    |
+    | 분산형 조정      | 각 에이전트가 자율적 결정을 내리고 협상을 통해 조정    |
 
 ##### 멀티 에이전트 시스템 실제 사례: RPG 게임 레벨업 예측 시스템
 
@@ -2013,13 +2013,13 @@ for each_level_up_path in candidate_paths:
 #### 5.1 MCP(Model Context Protocol) 개요
 
 - 정의 및 발전 배경
-  - **Model Context Protocol(MCP)**은 Anthropic이 2024년 11월에 공개한 **오픈 표준(OSS)** 프로토콜이며, AI 모델(LLM)과 외부 시스템 간 **표준화된 연결을 제공하는 통신 프로토콜**
-  - USB-C 포트처럼, AI 애플리케이션이 다양한 도구와 데이터 소스로 **동일한 방식으로 연결 가능**하게 해주는 범용 인터페이스
-  - 기존의 N×M 개별 통합을 MCP 하나의 인터페이스로 대체해 **확장성과 유지보수성을 향상**
+  - **Model Context Protocol(MCP)**은 Anthropic이 2024년 11월에 공개한 오픈 표준(OSS) 프로토콜이며, AI 모델(LLM)과 외부 시스템 간 표준화된 연결을 제공하는 통신 프로토콜입니다.
+  - USB-C 포트처럼, AI 애플리케이션이 다양한 도구와 데이터 소스로 동일한 방식으로 연결 가능하게 해주는 범용 인터페이스
+  - 기존의 N×M 개별 통합을 MCP 하나의 인터페이스로 대체해 확장성과 유지보수성을 향상시킵니다
 
 ![N×M 인터페이스 시각화](./assets/N×M-interface.png)
 
-  - **Language Server Protocol (LSP)**의 메시지 흐름 아이디어를 의도적으로 재사용하며, **JSON-RPC 2.0** 위에서 전송
+  - Language Server Protocol (LSP)의 메시지 흐름 아이디어를 의도적으로 재사용하며, JSON-RPC 2.0 위에서 전송됩니다
 
 - 왜 MCP가 필요한가?
 
@@ -2138,7 +2138,7 @@ for each_level_up_path in candidate_paths:
 
   - 도구, 리소스 정의
 
-    - Resoruces(정적 데이터)
+    - Resources(정적 데이터)
       - 예시: `file:///home/user/project/README.md` (로컬 파일)
       - 예시: `postgres://table/users` (데이터베이스 테이블)
       - 예시: `github://repo/issues` (GitHub 이슈 목록)
@@ -2166,7 +2166,7 @@ for each_level_up_path in candidate_paths:
 
       1. 초기 연결 및 능력 협상
 
-         ```tex
+         ```text
          사용자: "최근 GitHub 이슈들을 요약해서 Slack으로 보내줘"
          
          [Host] Claude Desktop이 사용 가능한 MCP 서버들을 확인
@@ -2179,7 +2179,7 @@ for each_level_up_path in candidate_paths:
 
       2. 요청 분석 및 도구 선택
 
-         ```tex
+         ```text
          [Host] AI가 요청을 분석:
          "GitHub에서 이슈를 가져와야 함 → GitHub MCP Server 필요"
          "Slack으로 보내야 함 → Slack MCP Server 필요"
@@ -2192,7 +2192,7 @@ for each_level_up_path in candidate_paths:
 
       3. 순차적 도구 실행
 
-         ```tex
+         ```text
          [Host → GitHub Server] JSON-RPC 요청 전송:
          {
            "jsonrpc": "2.0",
@@ -2221,7 +2221,7 @@ for each_level_up_path in candidate_paths:
 
       4. AI 처리 및 결과 생성
 
-         ```tex
+         ```text
          [Host] AI가 받은 데이터를 처리:
          "GitHub 이슈 2개 확인:
          1. 버그: 로그인 실패 - 우선순위 높음
@@ -2232,7 +2232,7 @@ for each_level_up_path in candidate_paths:
 
       5. 최종 결과 전송
 
-         ```tex
+         ```text
          [Host → Slack Server] JSON-RPC 요청:
          {
            "jsonrpc": "2.0",
@@ -2241,7 +2241,7 @@ for each_level_up_path in candidate_paths:
              "name": "send_message",
              "arguments": {
                "channel": "#dev-team",
-               "text": "📋 GitHub 이슈 요약:\n1. 버그: 로그인 실패 (우선)\n2. 기능: 다크모드 추가"
+               "text": "GitHub 이슈 요약:\n1. 버그: 로그인 실패 (우선)\n2. 기능: 다크모드 추가"
              }
            }
          }
@@ -2255,7 +2255,7 @@ for each_level_up_path in candidate_paths:
 
       6. 사용자에게 최종 보고
 
-         ```tex
+         ```text
          [Host → 사용자] 
          "완료했습니다!
          - GitHub에서 최근 이슈 2개를 확인했습니다
@@ -2263,18 +2263,18 @@ for each_level_up_path in candidate_paths:
          - 로그인 버그가 가장 시급한 문제로 확인됩니다"
          ```
 
-    - 에처 처리 예시
+    - 에러 처리 예시
 
       - 연결 실패 시
 
-        ```tex
+        ```text
         [GitHub Server] 오프라인 → Host가 자동으로 대체 방안 제시
         "GitHub 서버에 연결할 수 없습니다. 로컬 이슈 백업 파일을 확인할까요?"
         ```
 
       - 권한 부족 시
 
-        ```tex
+        ```text
         [Slack Server] 권한 없음 → 구체적 안내 제공
         "Slack 채널 접근 권한이 없습니다. 관리자에게 #dev-team 채널 권한을 요청해주세요"
         ```
@@ -2285,7 +2285,7 @@ for each_level_up_path in candidate_paths:
 
       1. 지능형 코드 리뷰 어시스턴트
 
-         ```tex
+         ```text
          개발자: "이 PR을 리뷰해줘"
          
          워크플로우:
@@ -2299,7 +2299,7 @@ for each_level_up_path in candidate_paths:
 
       2. Vibe Coding 맥락 인식 개발 지원
 
-         ```tex
+         ```text
          개발자: "사용자 인증 기능을 구현하려고 해"
          
          실시간 지원:
@@ -2314,7 +2314,7 @@ for each_level_up_path in candidate_paths:
 
       1. 영업 팀 AI 어시스턴트
 
-         ```tex
+         ```text
          영업팀: "이번 분기 서울 지역 매출 현황을 보고서로 만들어줘"
          
          처리 과정:
@@ -2328,7 +2328,7 @@ for each_level_up_path in candidate_paths:
 
       2. HR 온보딩 자동화
 
-         ```tex
+         ```text
          HR 담당자: "신입사원 김철수님 온보딩을 시작해줘"
          
          자동화 워크플로우:
@@ -2345,7 +2345,7 @@ for each_level_up_path in candidate_paths:
 
       1. 의료진 의사결정 지원
 
-         ```tex
+         ```text
          의사: "이 환자의 증상과 유사한 최근 논문들을 찾아줘"
          
          연구 워크플로우:
@@ -2359,7 +2359,7 @@ for each_level_up_path in candidate_paths:
 
       2. 금융 리스크 분석
 
-         ```tex
+         ```text
          리스크 분석가: "이 포트폴리오의 리스크를 평가해줘"
          
          분석 프로세스:
@@ -2376,7 +2376,7 @@ for each_level_up_path in candidate_paths:
 
       1. 콘텐츠 크리에이터 워크플로우
 
-         ```tex
+         ```text
          유튜버: "어제 라이브 스트림을 편집해서 숏폼 영상 3개 만들어줘"
          
          자동화 파이프라인:
