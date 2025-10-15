@@ -68,24 +68,28 @@ lab05-crawl/
 
 ## 실습 단계
 
+### 사내망 환경 설정 가이드
+
+**이 실습은 사내망 환경을 위해 최적화되었습니다:**
+- pip 설치 시 SSL 검증 우회 (`--trusted-host`)
+- OpenAI API 호출 시 SSL 검증 비활성화
+- urllib3 경고 메시지 숨김 처리
+
+**주요 차이점:**
+- 일반 환경: `pip install -r requirements.txt`
+- 사내망 환경: `pip install -r requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org`
+
+---
+
 ### Step 1: 환경 설정 및 의존성 설치 (15분)
 
-#### 1. uv 설치 (필요한 경우)
-```bash
-# uv가 설치되어 있지 않은 경우
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# 또는 pip로 설치
-pip install uv
-```
-
-#### 2. 가상환경 생성 및 활성화
+#### 1. 가상환경 생성 및 활성화
 ```bash
 # lab05 디렉토리로 이동
 cd lab05-crawl
 
-# uv로 가상환경 생성
-uv venv
+# Python 가상환경 생성
+python -m venv .venv
 
 # 가상환경 활성화
 # Linux/Mac:
@@ -95,53 +99,67 @@ source .venv/bin/activate
 # .venv\Scripts\activate
 ```
 
-#### 3. 패키지 설치
+#### 2. pip 업그레이드 (사내망 환경)
 ```bash
-# 가상환경이 활성화된 상태에서 패키지 설치
-uv pip install -r requirements.txt
+# 가상환경이 활성화된 상태에서 pip 업그레이드
+python -m pip install --upgrade pip --trusted-host pypi.org --trusted-host files.pythonhosted.org
+```
+
+#### 3. 패키지 설치 (사내망 환경용)
+```bash
+# SSL 검증 우회 옵션을 사용하여 패키지 설치
+pip install -r requirements.txt \
+  --trusted-host pypi.org \
+  --trusted-host files.pythonhosted.org \
+  --trusted-host pypi.python.org
 
 # 또는 프로젝트 루트의 requirements.txt 사용
-uv pip install -r ../requirements.txt
+pip install -r ../requirements.txt \
+  --trusted-host pypi.org \
+  --trusted-host files.pythonhosted.org \
+  --trusted-host pypi.python.org
 ```
+
+**참고**: `--trusted-host` 옵션은 사내망 환경에서 SSL 인증서 검증 문제를 우회하기 위해 필요합니다.
 
 #### 4. 환경 변수 설정
 ```bash
-# lab05 디렉토리에 .env 파일 생성
+# lab05-crawl 디렉토리로 이동
 cd lab05-crawl
-cat > .env << EOF
-# OpenAI API 키 (필수)
+
+# .env.example을 참고하여 .env 파일 생성
+cp .env.example .env
+
+# 생성된 .env 파일을 편집기로 열어 실제 API 키 입력
+# vim .env
+# 또는
+# nano .env
+```
+
+**필수 설정 항목**:
+```bash
+# OpenAI API 키 (필수) - https://platform.openai.com/account/api-keys 에서 발급
 OPENAI_API_KEY=your_actual_openai_api_key_here
+OPENAI_MODEL=gpt-4o
 
-# 서버 설정
-HOST=0.0.0.0
-PORT=8000
-DEBUG=false
-LOG_LEVEL=info
-
-# MCP 서버 설정
+# MCP 서버 설정 (기본값 사용 가능)
 MCP_SERVER_URL=http://127.0.0.1:4200/my-custom-path/
 MCP_CONNECTION_TIMEOUT=30
 MCP_RETRY_ATTEMPTS=3
 
-# 모델 설정
-OPENAI_MODEL=gpt-4o
-
-# 선택사항: 벡터 DB 및 검색 엔진 설정
-# QDRANT_HOST=
-# OPENSEARCH_HOST=
-# DATABASE_URL=
-EOF
+# 서버 설정 (기본값 사용 가능)
+HOST=0.0.0.0
+PORT=8000
+LOG_LEVEL=info
 ```
 
-**중요**: `.env` 파일은 lab05-crawl 디렉토리에 위치하며, 이미 `.gitignore`에 포함되어 있어 Git에 커밋되지 않습니다.
+**중요 사항**:
+- `.env` 파일은 **lab05-crawl 디렉토리 루트**에 위치해야 합니다 (mcp-client 안이 아님)
+- mcp-server와 mcp-client가 같은 `.env` 파일을 공유합니다
+- `.env` 파일은 이미 `.gitignore`에 포함되어 있어 Git에 커밋되지 않습니다
 
-#### 5. 설치 확인
-```bash
-# 핵심 패키지 확인
-python -c "import fastmcp; print(f'FastMCP: {fastmcp.__version__}')"
-python -c "import fastapi; print(f'FastAPI: {fastapi.__version__}')"
-python -c "import openai; print(f'OpenAI: {openai.__version__}')"
-python -c "import bs4; print('BeautifulSoup4: OK')"
+# 설치된 패키지 목록 확인
+pip list | grep -E "fastmcp|fastapi|openai|beautifulsoup4"
 ```
 
 ### Step 2: MCP 서버 실행 (10분)
@@ -416,6 +434,36 @@ curl -X POST "http://localhost:8000/api/llm/query" \
 
 ### 일반적인 오류
 
+#### 0. SSL 인증서 검증 오류 (사내망 환경)
+```bash
+# 오류 메시지 예시:
+# SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]
+# Could not fetch URL https://pypi.org/simple/...
+
+# 해결 방법 1: pip 설치 시 --trusted-host 옵션 사용
+pip install -r requirements.txt \
+  --trusted-host pypi.org \
+  --trusted-host files.pythonhosted.org \
+  --trusted-host pypi.python.org
+
+# 해결 방법 2: pip 설정 파일에 추가 (영구 적용)
+mkdir -p ~/.pip
+cat > ~/.pip/pip.conf << EOF
+[global]
+trusted-host = pypi.org
+               files.pythonhosted.org
+               pypi.python.org
+EOF
+
+# Windows의 경우:
+# %APPDATA%\pip\pip.ini 파일 생성
+```
+
+**OpenAI API SSL 오류 해결**:
+- 코드에 이미 SSL 검증 비활성화가 적용되어 있습니다
+- `llm_service.py`에서 `httpx.AsyncClient(verify=False)` 사용
+- `urllib3.disable_warnings()` 적용됨
+
 #### 1. MCP 연결 실패
 ```bash
 # MCP 서버 상태 확인
@@ -448,25 +496,37 @@ cat result.json | jq '.content_length'
 
 #### 3. 패키지 의존성 오류
 ```bash
-# uv 가상환경 재생성
+# 가상환경 재생성
 cd lab05-crawl
 rm -rf .venv  # 기존 가상환경 삭제
-uv venv       # 새 가상환경 생성
+python -m venv .venv  # 새 가상환경 생성
 
 # 가상환경 활성화
 source .venv/bin/activate  # Linux/Mac
 # 또는
 # .venv\Scripts\activate   # Windows
 
-# uv로 패키지 재설치
-uv pip install -r requirements.txt
+# pip 업그레이드
+python -m pip install --upgrade pip \
+  --trusted-host pypi.org \
+  --trusted-host files.pythonhosted.org
 
-# 또는 캐시 클리어 후 재설치
-uv cache clean
-uv pip install -r requirements.txt
+# 패키지 재설치 (사내망 환경용)
+pip install -r requirements.txt \
+  --trusted-host pypi.org \
+  --trusted-host files.pythonhosted.org \
+  --trusted-host pypi.python.org
+
+# 또는 pip 캐시 클리어 후 재설치
+pip cache purge
+pip install -r requirements.txt \
+  --trusted-host pypi.org \
+  --trusted-host files.pythonhosted.org \
+  --trusted-host pypi.python.org \
+  --no-cache-dir
 ```
 
-#### 3. 서비스 통신 오류
+#### 4. 서비스 통신 오류
 ```bash
 # 네트워크 연결 확인
 curl -v http://localhost:4200/my-custom-path/health

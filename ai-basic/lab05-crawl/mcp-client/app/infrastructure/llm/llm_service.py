@@ -6,6 +6,8 @@ import asyncio
 from datetime import datetime
 import tiktoken
 import numpy as np
+import httpx
+import urllib3
 from openai import AsyncOpenAI
 from app.config import settings
 from app.infrastructure.mcp.mcp_service import mcp_service
@@ -17,11 +19,15 @@ logger = logging.getLogger(__name__)
 EMBEDDING_AVAILABLE = False
 logger.info("임베딩 모델 사용 안함 - OpenAI API만으로 의도 분류")
 
+# SSL 검증 비활성화 설정 (사내망 환경용)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+no_ssl_httpx = httpx.AsyncClient(verify=False)
+
 class LLMService:
     """Service class for managing LLM interactions"""
     
     def __init__(self):
-        self._client = AsyncOpenAI(api_key=settings.openai_api_key)
+        self._client = AsyncOpenAI(api_key=settings.openai_api_key, http_client=no_ssl_httpx)
         try:
             self.tokenizer = tiktoken.encoding_for_model("gpt-4o")
         except Exception:
