@@ -151,7 +151,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
   - 예: "은행(bank)"이 "강둑"과 "금융기관" 중 어느 의미인지 문맥으로 판단
 - **Self-Attention 메커니즘**: 문장 내 모든 단어 간의 관계를 동시에 파악
 - **대규모 사전학습**: 방대한 텍스트로 학습 후, 특정 Task에 Fine-tuning
-- **대표 모델**: BERT, GPT, Claude, Gemini 등
+- **대표 모델**: BERT, GPT 계열(ChatGPT, Claude, Gemini 등)
 
 **정리: NLP의 진화**
 ```
@@ -159,7 +159,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
     ↓
 2013-2017: 임베딩 시대(Word2Vec, GloVe) + RNN/LSTM
     ↓
-2017-현재: Transformer 시대(BERT, GPT, LLM)
+2017-현재: Transformer 시대(BERT, GPT 계열(ChatGPT, Claude, Gemini 등))
 ```
 
 ---
