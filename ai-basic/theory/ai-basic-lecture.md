@@ -151,7 +151,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
   - 예: "은행(bank)"이 "강둑"과 "금융기관" 중 어느 의미인지 문맥으로 판단
 - **Self-Attention 메커니즘**: 문장 내 모든 단어 간의 관계를 동시에 파악
 - **대규모 사전학습**: 방대한 텍스트로 학습 후, 특정 Task에 Fine-tuning
-- **대표 모델**: BERT, GPT, Claude, Gemini 등
+- **대표 모델**: BERT, GPT 계열(ChatGPT, Claude, Gemini 등)
 
 **정리: NLP의 진화**
 ```
@@ -159,7 +159,7 @@ NLP란 인간 언어(자연어)를 **컴퓨터가 이해하고 활용할 수 있
     ↓
 2013-2017: 임베딩 시대(Word2Vec, GloVe) + RNN/LSTM
     ↓
-2017-현재: Transformer 시대(BERT, GPT, LLM)
+2017-현재: Transformer 시대(BERT, GPT 계열(ChatGPT, Claude, Gemini 등))
 ```
 
 ---
@@ -516,20 +516,22 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 
 ##### 오른쪽: Decoder - "답변을 생성하는 엔진"
 
-**비유**: 번역기가 한국어를 보고(Encoder) 영어를 만들어내는(Decoder) 과정
+**비유**: 작가가 소설을 쓸 때 "지금까지 쓴 내용"을 보면서 다음 문장을 이어 쓰는 과정
 
 **입력 처리**
-- 예: 번역 문장 `"Bonjour je t'aime"`(프랑스어)
+- 예: 지금까지 생성한 출력 `"Hello I"`
 - Tokenization & Embedding + Positional Encoding 적용
 
 **Decoder Layer(N번 반복)**
-1. **Masked Multi-Head Attention**:
-   - "이전 단어까지만" 참조 가능미래 단어는 가림)
-   - 왜? 번역/생성할 때는 아직 만들지 않은 단어를 볼 수 없으니까
+1. **Masked Self-Attention**:
+   - 자기 자신이 생성한 "이전 토큰들"만 참조 (미래 토큰은 가림)
+   - 왜? 생성할 때는 아직 만들지 않은 단어를 볼 수 없으니까
+   - 예: "love"를 생성할 때는 "Hello I"만 볼 수 있음
 
-2. **Multi-Head Attention(Cross-Attention)**:
-   - Encoder의 출력을 참조
-   - "원문(프랑스어)의 어느 부분을 번역해야 할까?" 판단
+2. **Cross-Attention** (Encoder-Decoder 구조에서만):
+   - Encoder의 출력(입력 문장)을 참조
+   - "원문의 어느 부분을 번역해야 할까?" 판단
+   - **참고**: GPT 같은 Decoder-only 모델에는 이 레이어가 없음
 
 3. **Feed-forward & Layer Norm**: 최종 변환
 
@@ -537,15 +539,26 @@ Block 통과할수록 값이 너무 커지거나 작아짐
 - `Linear → Softmax`를 통해 다음 단어 예측
 - 예: "Hello" → "I" → "love" → "you" 순차 생성
 
-**실전에서 Decoder가 하는 일**
+**실전에서 Decoder가 하는 일 (번역 예시)**
 ```text
-입력(프랑스어): "Bonjour je t'aime"
+Encoder 출력: "Bonjour je t'aime" 의미 벡터
 ↓
 Decoder 작동:
-1단계: "Hello" 생성(Bonjour를 참조)
-2단계: "I" 생성(je를 참조)
-3단계: "love" 생성(t'aime를 참조)
-4단계: "you" 생성(문맥 종합)
+1단계: [START] → "Hello" 생성
+  - Masked Self-Attention: [START]만 참조
+  - Cross-Attention: "Bonjour"에 집중
+
+2단계: [START] "Hello" → "I" 생성
+  - Masked Self-Attention: [START] "Hello" 참조
+  - Cross-Attention: "je"에 집중
+
+3단계: [START] "Hello" "I" → "love" 생성
+  - Masked Self-Attention: [START] "Hello" "I" 참조
+  - Cross-Attention: "t'aime"에 집중
+
+4단계: [START] "Hello" "I" "love" → "you" 생성
+  - Masked Self-Attention: 이전 모든 토큰 참조
+  - Cross-Attention: 전체 문맥 종합
 ↓
 출력(영어): "Hello I love you"
 ```
