@@ -10,13 +10,17 @@ python-dotenv>=1.0.0
 
 # HTTP & Async
 httpx>=0.25.0
+aiofiles>=23.0.0
+urllib3>=2.0.0
 
 # AI & LLM
 openai>=1.80.0
 tiktoken>=0.5.0
+numpy>=1.24.0
 
 # Web Scraping & HTML Processing
 beautifulsoup4>=4.12.0
+lxml>=4.9.0
 markdownify>=0.12.6
 pymupdf4llm>=0.0.9
 
