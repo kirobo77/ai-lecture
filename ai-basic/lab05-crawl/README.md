@@ -446,7 +446,10 @@ pip install -r requirements.txt \
   --trusted-host files.pythonhosted.org \
   --trusted-host pypi.python.org
 
-# 해결 방법 2: pip 설정 파일에 추가 (영구 적용)
+# powershell 터미널에서 -- 오류 시(한줄로)
+pip install -r requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pypi.python.org
+
+# 해결 방법 2: pip 설정 파일에 추가(영구 적용)
 mkdir -p ~/.pip
 cat > ~/.pip/pip.conf << EOF
 [global]
