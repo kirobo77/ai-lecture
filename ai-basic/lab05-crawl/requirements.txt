@@ -8,35 +8,21 @@ pydantic>=2.5.0,<3.0.0
 pydantic-settings>=2.1.0,<3.0.0
 python-dotenv>=1.0.0
 
-# Database
-asyncpg>=0.29.0
-sqlalchemy>=2.0.20,<2.1.0
-alembic>=1.13.0
-
 # HTTP & Async
 httpx>=0.25.0
 aiofiles>=23.0.0
+urllib3>=2.0.0
 
 # AI & LLM
 openai>=1.80.0
 tiktoken>=0.5.0
-sentence-transformers>=2.2.2
+numpy>=1.24.0
 
-# Vector Database & Search
-qdrant-client>=1.7.0
-opensearch-py>=2.4.0
-
-# Web Scraping (Optional - only if needed)
-playwright>=1.40.0
+# Web Scraping & HTML Processing
 beautifulsoup4>=4.12.0
 lxml>=4.9.0
 markdownify>=0.12.6
-crawl4ai>=0.7.0
 pymupdf4llm>=0.0.9
 
 # Utilities
 python-multipart>=0.0.6
-aiolimiter>=1.1.0
-
-# PDF Generation
-reportlab>=4.0.0
