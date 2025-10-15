@@ -5,6 +5,7 @@
 .env.test
 .env.production
 *.env
+!*.env.example
 secrets.py
 api_keys.py
 
