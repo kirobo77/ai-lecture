@@ -1958,11 +1958,11 @@ LLM이 자동 생성한 확장 쿼리:
 
 ---
 
-**2. EnsembleRetriever (하이브리드 검색 구현)**
+**2. EnsembleRetriever(하이브리드 검색 구현)**
 
 벡터 검색과 키워드 검색(BM25)을 결합하여 정확도 향상.
 
-> 💡 **용어 참고**: LangChain에서는 `EnsembleRetriever`라고 부르지만, 엄밀히 말하면 **하이브리드 검색**(Hybrid Search)입니다.
+> **용어 참고**: LangChain에서는 `EnsembleRetriever`라고 부르지만, 엄밀히 말하면 **하이브리드 검색**(Hybrid Search)입니다.
 > 전통적인 앙상블(Ensemble)은 여러 머신러닝 **모델**을 결합하는 것을 의미하지만,
 > 여기서는 **벡터 검색 방법 + BM25 알고리즘**을 결합합니다. (BM25는 모델이 아닌 통계 기반 랭킹 알고리즘)
 
@@ -1981,12 +1981,12 @@ ensemble_retriever = EnsembleRetriever(
 ```
 
 **가중치 조정 가이드**
-- 기술 문서/코드: BM25 가중치 높게 (정확한 키워드 중요)
-- 일반 문서/대화: 벡터 검색 가중치 높게 (의미 이해 중요)
+- 기술 문서/코드: BM25 가중치 높게(정확한 키워드 중요)
+- 일반 문서/대화: 벡터 검색 가중치 높게(의미 이해 중요)
 
 ---
 
-**3. ContextualCompressionRetriever (검색 결과 필터링 & 압축)**
+**3. ContextualCompressionRetriever(검색 결과 필터링 & 압축)**
 
 **무엇을 압축하나?**
 - 검색된 **문서 내용 자체**를 압축합니다
