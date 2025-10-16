@@ -47,14 +47,28 @@
   - [3. RAG 시스템 설계와 구현](#3-RAG-시스템-설계와-구현)
     - [3.1 설계 기본](#31-설계-기본)
     - [3.2 RAG가 해결하는 LLM의 문제점](#32-RAG가-해결하는-LLM의-문제점)
-    - [3.3 실습 : RAG 시스템 실습(lab-03)](#33-RAG-시스템-실습-lab-3)
-    - [3.4 RAG 검색 최적화 기법](#34-RAG-검색-최적화-기법)
-      - [3.4.1 하이브리드 검색](#341-하이브리드-검색-Hybrid-Search)
-      - [3.4.2 Re-ranking(재정렬)](#342-Re-ranking-재정렬)
-      - [3.4.3 Query Expansion(쿼리 확장)](#343-Query-Expansion-쿼리-확장)
-      - [3.4.4 Multi-hop Reasoning(다단계 추론)](#344-Multi-hop-Reasoning-다단계-추론)
-    - [3.5 RAG 성능 최적화 전략](#35-RAG-성능-최적화-전략)
-    - [3.6 RAG의 현재와 미래: 다양한 접근법과 정답의 부재](#36-RAG의-현재와-미래-다양한-접근법과-정답의-부재)
+    - [3.3 LangChain 프레임워크](#33-LangChain-프레임워크)
+      - [3.3.1 LangChain이란?](#331-LangChain이란)
+      - [3.3.2 순수 구현 vs LangChain 비교](#332-순수-구현-vs-LangChain-비교)
+      - [3.3.3 실습 파일에서 사용되는 LangChain 컴포넌트](#333-실습-파일에서-사용되는-LangChain-컴포넌트)
+      - [3.3.4 고급 검색 컴포넌트](#334-고급-검색-컴포넌트)
+      - [3.3.5 LangChain의 장단점](#335-LangChain의-장단점)
+    - [3.4 컨텍스트 윈도우 관리와 토큰 최적화](#34-컨텍스트-윈도우-관리와-토큰-최적화)
+      - [3.4.1 컨텍스트 윈도우 관리](#341-컨텍스트-윈도우-관리)
+      - [3.4.2 tiktoken : OpenAI의 토큰 카운팅 라이브러리](#342-tiktoken-OpenAI의-토큰-카운팅-라이브러리)
+      - [3.4.3 TokenCounter 클래스 구현](#343-TokenCounter-클래스-구현)
+      - [3.4.4 문서 청킹 전략](#344-문서-청킹-전략)
+      - [3.4.5 컨텍스트 압축 전략](#345-컨텍스트-압축-전략)
+      - [3.4.6 ContextManager 통합 관리](#346-ContextManager-통합-관리)
+      - [3.4.7 실전 사용 예시](#347-실전-사용-예시)
+    - [3.5 실습 : RAG 시스템 실습(lab-03)](#35-실습-RAG-시스템-실습-lab-03)
+    - [3.6 RAG 검색 최적화 기법](#36-RAG-검색-최적화-기법)
+      - [3.6.1 하이브리드 검색](#361-하이브리드-검색-Hybrid-Search)
+      - [3.6.2 Re-ranking(재정렬)](#362-Re-ranking-재정렬)
+      - [3.6.3 Query Expansion(쿼리 확장)](#363-Query-Expansion-쿼리-확장)
+      - [3.6.4 Multi-hop Reasoning(다단계 추론)](#364-Multi-hop-Reasoning-다단계-추론)
+    - [3.7 RAG 성능 최적화 전략](#37-RAG-성능-최적화-전략)
+    - [3.8 RAG의 현재와 미래: 다양한 접근법과 정답의 부재](#38-RAG의-현재와-미래-다양한-접근법과-정답의-부재)
 - [에이전트의 모든 것](#에이전트의-모든-것)
   - [4. 단일 에이전트와 멀티 에이전트 시스템](#4-단일-에이전트와-멀티-에이전트-시스템)
     - [4.1 AI 에이전트 기초 개념](#41-AI-에이전트-기초-개념)
@@ -1771,7 +1785,1014 @@ LLM: "2024년 3분기 매출은 150억원으로 전년 대비 20% 증가했습�
 
 ---
 
-#### 3.3 실습 : RAG 시스템 실습(lab-03)
+#### 3.3 LangChain 프레임워크
+
+##### 3.3.1 LangChain이란?
+
+**LangChain**은 대규모 언어 모델(LLM)을 활용한 애플리케이션 개발을 위한 오픈소스 프레임워크입니다.
+
+**핵심 개념**
+- **체인(Chain)**: 여러 컴포넌트를 연결하여 복잡한 작업 수행
+- **프롬프트 템플릿**: 재사용 가능한 프롬프트 구조 정의
+- **메모리(Memory)**: 대화 기록 및 컨텍스트 관리
+- **에이전트(Agent)**: 도구를 자율적으로 선택하고 실행하는 지능형 시스템
+
+**LangChain이 해결하는 문제**
+- LLM 애플리케이션 개발 시 반복적으로 발생하는 보일러플레이트 코드
+- 벡터 스토어, 임베딩, LLM 등 다양한 컴포넌트 통합의 복잡성
+- 프롬프트 관리 및 체인 구성의 어려움
+- 검색 시스템(RAG)의 복잡한 파이프라인 구축
+
+---
+
+##### 3.3.2 순수 구현 vs LangChain 비교
+
+| 비교 항목 | 순수 구현 | LangChain |
+|---------|----------|-----------|
+| **코드 복잡도** | 높음(모든 것을 직접 구현) | 낮음(추상화된 컴포넌트 사용) |
+| **개발 속도** | 느림(상세 구현 필요) | 빠름(즉시 사용 가능) |
+| **학습 곡선** | 가파름(원리부터 이해) | 완만함(사용법 위주) |
+| **커스터마이징** | 높음(모든 세부사항 제어) | 중간(프레임워크 범위 내) |
+| **디버깅** | 어려움(직접 추적 필요) | 쉬움(추상화로 간소화) |
+| **원리 이해** | 깊음(직접 구현하며 학습) | 얕음(내부 동작 추상화) |
+| **유지보수** | 직접 관리 필요 | 프레임워크 업데이트 자동 반영 |
+| **성능 최적화** | 완전한 제어 가능 | 프레임워크 최적화에 의존 |
+| **코드 라인 수** | 많음(~600줄) | 적음(~300줄) |
+
+**권장 학습 접근법**
+1. **순수 구현으로 원리 이해** : 벡터 검색, 임베딩, 체인 구성의 내부 동작 파악
+2. **LangChain으로 생산성 향상** : 실무 프로젝트에서 빠른 개발
+3. **하이브리드 접근** : 중요한 부분은 커스터마이징, 나머지는 LangChain 활용
+
+---
+
+##### 3.3.3 실습 파일에서 사용되는 LangChain 컴포넌트
+
+**basic_rag_langchain.py에서 사용하는 컴포넌트**
+
+```python
+# 1. 임베딩 모델
+from langchain_openai import OpenAIEmbeddings
+embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
+
+# 2. LLM (Chat Model)
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
+
+# 3. 벡터 스토어
+from langchain_community.vectorstores import Chroma
+vectorstore = Chroma(
+    collection_name="my-collection",
+    embedding_function=embeddings,
+    persist_directory="./chroma_db"
+)
+
+# 4. Retriever (검색기)
+retriever = vectorstore.as_retriever(
+    search_type="similarity",  # 검색 방식
+    search_kwargs={"k": 5}     # 상위 5개 문서 반환
+)
+
+# 5. 텍스트 분할기
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=50
+)
+
+# 6. 프롬프트 템플릿
+from langchain_core.prompts import ChatPromptTemplate
+prompt = ChatPromptTemplate.from_template("""
+맥락 정보: {context}
+질문: {question}
+답변:
+""")
+
+# 7. LCEL(LangChain Expression Language) - 체인 구성
+#    파이프(|) 연산자로 컴포넌트들을 연결하여 데이터 흐름을 정의
+from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+from langchain_core.output_parsers import StrOutputParser
+
+rag_chain = (
+    # 1단계: 병렬 실행 - retriever로 문서 검색 + 질문 그대로 전달
+    RunnableParallel({
+        "context": retriever | format_docs,  # 검색 → 포맷팅
+        "question": RunnablePassthrough()    # 질문 그대로 통과
+    })
+    # 2단계: 프롬프트에 context와 question 주입
+    | prompt
+    # 3단계: LLM에 전달하여 답변 생성
+    | llm
+    # 4단계: 응답을 문자열로 파싱
+    | StrOutputParser()
+)
+
+# 체인 실행 - 질문만 입력하면 모든 단계가 자동 실행됨
+answer = rag_chain.invoke("질문 내용")
+```
+
+**LCEL이란?**
+
+LangChain Expression Language의 약자로, `|` 연산자를 사용해 컴포넌트들을 Unix 파이프처럼 연결하는 문법입니다.
+
+```python
+# Unix 파이프와 유사한 개념
+# cat file.txt | grep "error" | sort
+
+# LCEL도 동일한 방식
+input | component1 | component2 | component3 | output
+```
+
+**LCEL의 장점:**
+- **가독성**: 데이터 흐름이 한눈에 보임
+- **자동 최적화**: 병렬 실행, 배치 처리 자동 지원
+- **스트리밍**: `.stream()` 메서드로 실시간 응답 가능
+
+**컴포넌트 설명**
+
+| 컴포넌트 | 역할 | 순수 구현 시 필요 작업 |
+|---------|------|---------------------|
+| `OpenAIEmbeddings` | 텍스트를 벡터로 변환 | OpenAI API 직접 호출 + 에러 처리 |
+| `ChatOpenAI` | LLM과 대화 | API 호출 + 메시지 포맷팅 + 스트리밍 처리 |
+| `Chroma` | 벡터 저장/검색 | ChromaDB 클라이언트 직접 관리 |
+| `Retriever` | 문서 검색 인터페이스 | 검색 로직 + 점수 계산 직접 구현 |
+| `RecursiveCharacterTextSplitter` | 문서 청킹 | 분할 로직 + 오버랩 처리 직접 구현 |
+| `ChatPromptTemplate` | 프롬프트 구조화 | 문자열 포맷팅 직접 관리 |
+| `LCEL (파이프 \| 연산자)` | 체인 연결 및 병렬 실행 | 각 단계 순서 제어 + 병렬 처리 직접 구현 |
+| `StrOutputParser` | LLM 출력 파싱 | 응답 구조 파싱 로직 직접 구현 |
+
+---
+
+##### 3.3.4 고급 검색 컴포넌트(advanced_retrieval_langchain.py)
+
+**1. MultiQueryRetriever(다중 쿼리 검색)**
+
+하나의 질문을 LLM이 여러 관점에서 재작성하여 더 풍부한 검색 결과 확보.
+
+```python
+from langchain.retrievers.multi_query import MultiQueryRetriever
+
+multi_query_retriever = MultiQueryRetriever.from_llm(
+    retriever=similarity_retriever,
+    llm=llm
+)
+
+# 자동으로 쿼리를 3-5개로 확장하여 검색
+docs = multi_query_retriever.get_relevant_documents("RAG가 뭐야?")
+```
+
+**동작 방식**
+```
+원본 질문: "RAG가 뭐야?"
+
+LLM이 자동 생성한 확장 쿼리:
+1. "Retrieval-Augmented Generation의 개념은?"
+2. "RAG 시스템의 구조와 동작 원리"
+3. "RAG의 주요 구성 요소"
+
+→ 3개 쿼리로 각각 검색 후 결과 통합
+```
+
+**장점**: 표현 방식이 다른 관련 문서 발견 가능
+**단점**: LLM 호출로 인한 지연 시간 증가
+
+---
+
+**2. EnsembleRetriever (하이브리드 검색 구현)**
+
+벡터 검색과 키워드 검색(BM25)을 결합하여 정확도 향상.
+
+> 💡 **용어 참고**: LangChain에서는 `EnsembleRetriever`라고 부르지만, 엄밀히 말하면 **하이브리드 검색**(Hybrid Search)입니다.
+> 전통적인 앙상블(Ensemble)은 여러 머신러닝 **모델**을 결합하는 것을 의미하지만,
+> 여기서는 **벡터 검색 방법 + BM25 알고리즘**을 결합합니다. (BM25는 모델이 아닌 통계 기반 랭킹 알고리즘)
+
+```python
+from langchain.retrievers import EnsembleRetriever, BM25Retriever
+
+# BM25 검색기 (키워드 기반 통계 알고리즘)
+bm25_retriever = BM25Retriever.from_documents(documents)
+bm25_retriever.k = 5
+
+# 하이브리드 검색기 (가중치 조합)
+ensemble_retriever = EnsembleRetriever(
+    retrievers=[vector_retriever, bm25_retriever],
+    weights=[0.7, 0.3]  # 벡터 70%, BM25 30%
+)
+```
+
+**가중치 조정 가이드**
+- 기술 문서/코드: BM25 가중치 높게 (정확한 키워드 중요)
+- 일반 문서/대화: 벡터 검색 가중치 높게 (의미 이해 중요)
+
+---
+
+**3. ContextualCompressionRetriever (검색 결과 필터링 & 압축)**
+
+**무엇을 압축하나?**
+- 검색된 **문서 내용 자체**를 압축합니다
+- 질문과 관련 없는 부분을 제거하고, 중복 내용을 삭제하여 **LLM에 전달할 토큰 수를 줄입니다**
+
+**왜 필요한가?**
+```
+문제 상황:
+검색된 문서 = "RAG 시스템은... [500자] ...또한 날씨가 좋으면... [불필요한 내용]"
+
+압축 후:
+"RAG 시스템은... [200자, 질문 관련 부분만]"
+
+결과: 토큰 절감 → 비용 절감 + 응답 속도 향상 + 컨텍스트 윈도우 효율적 사용
+```
+
+```python
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import EmbeddingsFilter
+from langchain_community.document_transformers import EmbeddingsRedundantFilter
+from langchain.retrievers.document_compressors import DocumentCompressorPipeline
+
+# 1단계: 관련성 필터 (질문과 관련 없는 내용 제거)
+embeddings_filter = EmbeddingsFilter(
+    embeddings=embeddings,
+    similarity_threshold=0.3  # 유사도 0.3 이하 문서 제거
+)
+
+# 2단계: 중복 제거 필터 (서로 비슷한 문서 제거)
+redundant_filter = EmbeddingsRedundantFilter(
+    embeddings=embeddings,
+    similarity_threshold=0.8  # 유사도 0.8 이상이면 중복으로 판단
+)
+
+# 파이프라인: 필터 순차 적용
+compressor = DocumentCompressorPipeline(
+    transformers=[embeddings_filter, redundant_filter]
+)
+
+# 압축 검색기: 검색 → 필터링 → 압축
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=similarity_retriever
+)
+```
+
+**압축 효과 예시**
+```
+검색 전: 5개 문서 × 500자 = 2,500자 (약 600 토큰)
+  ├─ 관련성 필터: 5개 → 3개 (관련 없는 문서 2개 제거)
+  └─ 중복 제거: 3개 문서 중 비슷한 내용 압축
+압축 후: 3개 문서 × 200자 = 600자 (약 150 토큰)
+
+결과: 75% 토큰 절감 → OpenAI API 비용 75% 절감 + 응답 속도 향상
+```
+
+**장점 vs 단점**
+
+| 항목 | 설명 |
+|------|------|
+| **토큰 절감** | LLM에 전달할 토큰 수 감소 → API 비용 절감 |
+| **응답 속도 향상** | 처리할 텍스트 양 감소 → 생성 속도 빨라짐 |
+| **컨텍스트 윈도우 효율** | 더 많은 문서를 제한된 윈도우 내에 포함 가능 |
+| **정보 손실 위험** | 필터링 과정에서 중요한 문맥이 제거될 수 있음 |
+| **추가 처리 비용** | 임베딩 계산 + 필터링 로직 실행 시간 증가 |
+| **튜닝 어려움** | threshold 값 조정이 까다로움 (너무 높으면 정보 손실, 너무 낮으면 압축 효과 없음) |
+
+**사용 권장 사항:**
+- 사용: 검색된 문서가 많고 토큰 제한이 문제될 때
+- 주의: 복잡한 추론이 필요하거나 문맥이 중요한 경우
+
+---
+
+**4. MMR 검색(Maximal Marginal Relevance)**
+
+관련성과 다양성의 균형을 맞춘 검색 결과 제공.
+
+```python
+retriever = vectorstore.as_retriever(
+    search_type="mmr",
+    search_kwargs={
+        "k": 5,           # 최종 5개 반환
+        "fetch_k": 10,    # 먼저 10개 후보 검색
+        "lambda_mult": 0.7  # 관련성 가중치 (0.0~1.0)
+    }
+)
+```
+
+**lambda_mult 파라미터**
+- `1.0`: 순수 관련성 우선(유사도만 고려)
+- `0.5`: 관련성과 다양성 균형
+- `0.0`: 순수 다양성 우선(서로 다른 문서)
+
+**사용 예시**
+```
+질문: "머신러닝 알고리즘"
+
+일반 검색 결과:
+1. 지도 학습 알고리즘
+2. 지도 학습 종류
+3. 지도 학습 예시
+4. 지도 학습 평가
+5. 지도 학습 응용
+
+MMR 검색 결과(lambda=0.5):
+1. 지도 학습 알고리즘
+2. 비지도 학습 알고리즘
+3. 강화 학습 알고리즘
+4. 딥러닝 알고리즘
+5. 앙상블 알고리즘
+→ 더 다양한 관점의 문서 제공
+```
+
+---
+
+##### 3.3.5 LangChain의 장단점
+
+**장점**
+
+1. **빠른 프로토타이핑**
+   - 검증된 컴포넌트로 아이디어를 빠르게 구현
+   - 보일러플레이트 코드 최소화
+
+2. **풍부한 통합 지원**
+   - OpenAI, Anthropic, Google 등 다양한 LLM 지원
+   - Chroma, Pinecone, Qdrant 등 벡터 DB 통합
+   - 단일 인터페이스로 쉽게 전환 가능
+
+3. **LCEL(Expression Language)**
+   - 직관적인 파이프라인 구성 (`|` 연산자)
+   - 병렬 실행 자동 최적화
+   - 스트리밍, 배치 처리 자동 지원
+
+4. **커뮤니티 및 생태계**
+   - 활발한 오픈소스 커뮤니티
+   - LangSmith(디버깅/모니터링 도구)
+   - LangServe(API 배포 도구)
+
+**단점**
+
+1. **추상화로 인한 블랙박스**
+   - 내부 동작 원리 이해 어려움
+   - 예상치 못한 동작 발생 시 디버깅 곤란
+   - 성능 병목 지점 파악 어려움
+
+2. **무거운 의존성**
+   ```bash
+   # LangChain 설치 시 함께 설치되는 패키지들
+   langchain              # 핵심 프레임워크
+   langchain-community    # 커뮤니티 통합
+   langchain-openai       # OpenAI 통합
+   langchain-core         # 핵심 컴포넌트
+   pydantic              # 데이터 검증
+   SQLAlchemy            # DB 연결
+   aiohttp               # 비동기 HTTP
+   + 50개 이상의 의존성 패키지
+   ```
+   - 배포 용량 증가
+   - 버전 충돌 가능성
+
+3. **과도한 추상화 오버헤드**
+   ```python
+   # LangChain 방식
+   answer = rag_chain.invoke("질문")
+
+   # 내부적으로 수행되는 작업:
+   # - 입력 검증 (Pydantic)
+   # - 체인 각 단계의 래퍼 호출
+   # - 중간 결과 직렬화/역직렬화
+   # - 로깅 및 추적
+   # → 간단한 작업도 여러 레이어를 거침
+   ```
+   - 단순 작업에도 불필요한 처리
+   - 레이턴시 증가(수십 ms~수백 ms)
+
+4. **프레임워크 버전 의존성**
+   - 빠른 업데이트로 인한 Breaking Change 빈번
+   - 실습 코드가 버전에 따라 작동하지 않을 수 있음
+   - 예시: `v0.0.x` → `v0.1.x` → `v0.2.x` 마이그레이션 필요
+
+5. **커스터마이징 제약**
+   - 프레임워크 설계 범위를 벗어난 요구사항 구현 어려움
+   - 내장 컴포넌트 수정 시 복잡한 상속 구조
+   - 특수한 검색 로직이나 평가 지표 구현 시 한계
+
+6. **과도한 기능으로 인한 선택 피로**
+   ```python
+   # Retriever 종류만 10가지 이상
+   - VectorStoreRetriever
+   - MultiQueryRetriever
+   - EnsembleRetriever
+   - ContextualCompressionRetriever
+   - ParentDocumentRetriever
+   - SelfQueryRetriever
+   - TimeWeightedVectorStoreRetriever
+   - ...
+
+   # 어떤 것을 언제 써야 할지 혼란
+   ```
+
+**실무 의사결정 가이드**
+
+| 상황 | 권장 방식 |
+|------|----------|
+| 개념 학습 및 원리 이해 | 순수 구현 |
+| 빠른 프로토타입 제작 | LangChain |
+| 성능 최적화가 중요한 프로덕션 | 순수 구현 또는 하이브리드 |
+| 표준적인 RAG 파이프라인 | LangChain |
+| 특수한 검색 알고리즘 필요 | 순수 구현 |
+| 팀 전체가 LangChain 숙련도 높음 | LangChain |
+| 레이턴시가 매우 중요(실시간 서비스) | 순수 구현 |
+
+---
+
+#### 3.4 컨텍스트 윈도우 관리와 토큰 최적화
+
+##### 3.4.1 컨텍스트 윈도우 관리(context_management.py)
+
+**컨텍스트 윈도우란?**
+
+LLM에 입력으로 전달할 수 있는 토큰의 최대 범위를 의미합니다. 모델마다 제한이 다릅니다:
+
+| 모델 | 컨텍스트 윈도우 | 특징 |
+|------|----------------|------|
+| GPT-3.5-turbo | 4,096 토큰 | 표준 크기 |
+| GPT-4 | 8,192 토큰 | 일반 버전 |
+| GPT-4-32k | 32,768 토큰 | 확장 버전 (고비용) |
+| GPT-4o-mini | 128,000 토큰 | 최신 모델 |
+| Claude 3 | 200,000 토큰 | 가장 큰 컨텍스트 |
+
+**컨텍스트 관리가 중요한 이유**
+
+RAG 시스템에서 검색된 문서들을 LLM에 전달할 때, 토큰 제한으로 인해 모든 정보를 포함할 수 없습니다. 따라서 제한된 공간 내에서 **가장 관련성 높은 정보를 선별**하고 **효율적으로 배치**해야 합니다.
+
+**주요 과제:**
+1. 토큰 제한 내 최적 정보 선별
+2. 관련성 높은 정보 우선순위 부여
+3. 중복 정보 제거
+4. 정보 압축 및 요약
+5. 컨텍스트 일관성 유지
+
+---
+
+##### 3.4.2 tiktoken: OpenAI의 토큰 카운팅 라이브러리
+
+**tiktoken이란?**
+
+OpenAI에서 제공하는 공식 토큰 카운팅 라이브러리로, 실제 모델이 사용하는 것과 동일한 방식으로 텍스트를 토큰화합니다.
+
+**설치**
+```bash
+pip install tiktoken
+```
+
+**기본 사용법**
+
+```python
+import tiktoken
+
+# 1. 모델별 인코더 가져오기
+encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+
+# 2. 텍스트를 토큰으로 변환
+text = "안녕하세요, RAG 시스템에 대해 알려주세요."
+tokens = encoding.encode(text)
+
+print(f"텍스트: {text}")
+print(f"토큰 수: {len(tokens)}")
+print(f"토큰 목록: {tokens}")
+
+# 3. 토큰을 다시 텍스트로 변환
+decoded_text = encoding.decode(tokens)
+print(f"디코딩: {decoded_text}")
+```
+
+**실행 결과 예시:**
+```
+텍스트: 안녕하세요, RAG 시스템에 대해 알려주세요.
+토큰 수: 15
+토큰 목록: [31495, 238, 121, 108, 234, 112, 106, ...]
+디코딩: 안녕하세요, RAG 시스템에 대해 알려주세요.
+```
+
+**모델별 인코딩 방식**
+
+```python
+# gpt-3.5-turbo, gpt-4 계열
+encoding_gpt = tiktoken.encoding_for_model("gpt-3.5-turbo")
+
+# 모델을 찾을 수 없는 경우 기본 인코딩 사용
+try:
+    encoding = tiktoken.encoding_for_model("custom-model")
+except KeyError:
+    # cl100k_base: GPT-4, GPT-3.5-turbo 기본 인코딩
+    encoding = tiktoken.get_encoding("cl100k_base")
+```
+
+**주요 인코딩 방식**
+
+| 인코딩 이름 | 사용 모델 | 특징 |
+|------------|----------|------|
+| `cl100k_base` | gpt-4, gpt-3.5-turbo, text-embedding-ada-002 | 현재 표준 |
+| `p50k_base` | Codex 모델 | 코드 특화 |
+| `r50k_base` | GPT-3 (Davinci, Curie 등) | 구형 모델 |
+
+---
+
+##### 3.4.3 TokenCounter 클래스 구현(context_management.py)
+
+실습 파일에서 사용하는 토큰 카운팅 유틸리티입니다.
+
+```python
+import tiktoken
+
+class TokenCounter:
+    """토큰 계산을 위한 유틸리티 클래스"""
+
+    def __init__(self, model_name: str = "gpt-3.5-turbo"):
+        try:
+            # 모델에 맞는 인코더 로드
+            self.encoding = tiktoken.encoding_for_model(model_name)
+        except KeyError:
+            # 모델을 찾을 수 없는 경우 기본 인코딩 사용
+            self.encoding = tiktoken.get_encoding("cl100k_base")
+
+    def count_tokens(self, text: str) -> int:
+        """텍스트의 토큰 수 계산"""
+        try:
+            return len(self.encoding.encode(text))
+        except Exception:
+            # 인코딩 실패 시 근사값 사용 (1토큰 ≈ 4자)
+            return len(text) // 4
+
+    def truncate_to_tokens(self, text: str, max_tokens: int) -> str:
+        """지정된 토큰 수로 텍스트 자르기"""
+        try:
+            tokens = self.encoding.encode(text)
+
+            # 이미 제한 내인 경우
+            if len(tokens) <= max_tokens:
+                return text
+
+            # 토큰 자르기
+            truncated_tokens = tokens[:max_tokens]
+
+            # 다시 텍스트로 변환
+            return self.encoding.decode(truncated_tokens)
+        except Exception:
+            # 인코딩 실패 시 문자 기반 자르기
+            char_limit = max_tokens * 4
+            return text[:char_limit] if len(text) > char_limit else text
+```
+
+**사용 예시**
+
+```python
+token_counter = TokenCounter("gpt-3.5-turbo")
+
+# 1. 토큰 수 계산
+text = "RAG 시스템은 검색과 생성을 결합한 AI 기술입니다."
+token_count = token_counter.count_tokens(text)
+print(f"토큰 수: {token_count}")
+
+# 2. 특정 토큰 수로 자르기
+long_text = "..." * 1000  # 긴 텍스트
+truncated = token_counter.truncate_to_tokens(long_text, max_tokens=100)
+print(f"원본: {len(long_text)}자")
+print(f"자른 후: {len(truncated)}자")
+```
+
+**왜 근사값(1토큰 ≈ 4자)을 사용하나?**
+
+영어의 경우 평균적으로 1토큰 = 4자 정도이지만, 한국어는 **1토큰 = 1~3자** 정도로 더 효율적입니다. 이는 한국어가 2바이트 이상의 유니코드를 사용하기 때문입니다.
+
+```python
+# 영어 vs 한국어 토큰 효율성 비교
+token_counter = TokenCounter()
+
+english = "Retrieval-Augmented Generation is an AI technique"
+korean = "검색 증강 생성은 인공지능 기술입니다"
+
+en_tokens = token_counter.count_tokens(english)
+ko_tokens = token_counter.count_tokens(korean)
+
+print(f"영어: {len(english)}자 → {en_tokens} 토큰 (비율: {len(english)/en_tokens:.2f})")
+print(f"한국어: {len(korean)}자 → {ko_tokens} 토큰 (비율: {len(korean)/ko_tokens:.2f})")
+
+# 예상 결과:
+# 영어: 49자 → 10 토큰(비율: 4.90)
+# 한국어: 20자 → 15 토큰(비율: 1.33)
+```
+
+---
+
+##### 3.4.4 문서 청킹 전략(DocumentChunker)
+
+**청킹이 필요한 이유**
+- LLM 토큰 제한으로 긴 문서를 한 번에 처리 불가
+- 관련 부분만 선별적으로 검색하여 정확도 향상
+- 문서를 작은 단위로 나누어 임베딩 및 저장
+
+**1. 고정 크기 청킹(Fixed-Size Chunking)**
+
+```python
+class FixedSizeChunker(DocumentChunker):
+    """고정 크기 청킹"""
+
+    def __init__(self, chunk_size: int = 500, overlap: int = 50):
+        self.chunk_size = chunk_size  # 청크 크기
+        self.overlap = overlap        # 중복 구간
+        self.token_counter = TokenCounter()
+
+    def chunk_document(self, content: str, metadata: Dict) -> List[DocumentChunk]:
+        """고정 크기로 문서 청킹"""
+        chunks = []
+        text_length = len(content)
+        start_idx = 0
+        chunk_id = 0
+
+        while start_idx < text_length:
+            end_idx = min(start_idx + self.chunk_size, text_length)
+
+            # 단어 경계에서 자르기 (단어 중간 분리 방지)
+            if end_idx < text_length:
+                while end_idx > start_idx and content[end_idx] not in [' ', '\n', '\t']:
+                    end_idx -= 1
+
+                if end_idx == start_idx:  # 공백을 찾지 못한 경우
+                    end_idx = start_idx + self.chunk_size
+
+            chunk_content = content[start_idx:end_idx].strip()
+
+            if chunk_content:
+                chunk = DocumentChunk(
+                    id=f"{metadata.get('id', 'doc')}_{chunk_id}",
+                    content=chunk_content,
+                    metadata=metadata.copy(),
+                    token_count=self.token_counter.count_tokens(chunk_content),
+                    chunk_type="content"
+                )
+                chunks.append(chunk)
+                chunk_id += 1
+
+            # 다음 청크 시작 위치 (오버랩 고려)
+            start_idx = max(start_idx + 1, end_idx - self.overlap)
+
+        return chunks
+```
+
+**오버랩(Overlap)의 중요성**
+
+```
+청크 1: [문장A 문장B 문장C]
+청크 2:              [문장C 문장D 문장E]
+                      ↑ 오버랩 영역
+```
+
+오버랩을 두는 이유:
+- **문맥 연속성 보장**: 청크 경계에서 끊긴 정보 복원
+- **검색 정확도 향상**: 경계 부근 정보가 여러 청크에 존재
+- **의미 단절 방지**: 중요한 문맥이 잘리는 것 방지
+
+**2. 의미 기반 청킹(Semantic Chunking)**
+
+```python
+class SemanticChunker(DocumentChunker):
+    """의미 기반 청킹 (문단, 문장 경계 고려)"""
+
+    def __init__(self, max_chunk_size: int = 800, min_chunk_size: int = 200):
+        self.max_chunk_size = max_chunk_size
+        self.min_chunk_size = min_chunk_size
+        self.token_counter = TokenCounter()
+
+    def chunk_document(self, content: str, metadata: Dict) -> List[DocumentChunk]:
+        """의미 기반으로 문서 청킹"""
+        chunks = []
+
+        # 문단 단위로 분할
+        paragraphs = content.split('\n\n')
+
+        current_chunk = ""
+        current_size = 0
+        chunk_id = 0
+
+        for paragraph in paragraphs:
+            paragraph = paragraph.strip()
+            if not paragraph:
+                continue
+
+            para_size = len(paragraph)
+
+            # 현재 청크에 추가할 수 있는지 확인
+            if current_size + para_size <= self.max_chunk_size:
+                if current_chunk:
+                    current_chunk += "\n\n" + paragraph
+                else:
+                    current_chunk = paragraph
+                current_size += para_size
+            else:
+                # 현재 청크 저장 (최소 크기 이상인 경우)
+                if current_chunk and current_size >= self.min_chunk_size:
+                    chunk = DocumentChunk(
+                        id=f"{metadata.get('id', 'doc')}_{chunk_id}",
+                        content=current_chunk,
+                        metadata=metadata.copy(),
+                        token_count=self.token_counter.count_tokens(current_chunk),
+                        chunk_type="content"
+                    )
+                    chunks.append(chunk)
+                    chunk_id += 1
+
+                # 새 청크 시작
+                current_chunk = paragraph
+                current_size = para_size
+
+        # 마지막 청크 처리
+        if current_chunk and current_size >= self.min_chunk_size:
+            chunks.append(DocumentChunk(
+                id=f"{metadata.get('id', 'doc')}_{chunk_id}",
+                content=current_chunk,
+                metadata=metadata.copy(),
+                token_count=self.token_counter.count_tokens(current_chunk),
+                chunk_type="content"
+            ))
+
+        return chunks
+```
+
+**고정 크기 vs 의미 기반 비교**
+
+| 특성 | 고정 크기(Fixed) | 의미 기반(Semantic) |
+|------|------------------|---------------------|
+| **구현 난이도** | 쉬움 | 복잡 |
+| **청크 크기** | 균일 | 불균일 |
+| **의미 단위 보존** | X | O |
+| **문맥 단절** | 자주 발생 | 드물게 발생 |
+| **검색 정확도** | 보통 | 높음 |
+| **처리 속도** | 빠름 | 느림 |
+| **적합한 문서** | 구조화되지 않은 텍스트 | 문단 구조가 명확한 문서 |
+
+---
+
+##### 3.4.5 컨텍스트 압축 전략(ContextCompressor)
+
+검색된 문서들의 토큰 수가 모델의 컨텍스트 윈도우를 초과할 때 사용하는 압축 기법입니다.
+
+**1. Truncate(단순 자르기)**
+
+```python
+def _truncate_compression(self, chunks: List[DocumentChunk],
+                         max_tokens: int) -> List[DocumentChunk]:
+    """관련성 높은 순서로 정렬 후 토큰 제한까지만 포함"""
+    compressed_chunks = []
+    current_tokens = 0
+
+    # 관련성 점수로 정렬 (높은 순)
+    for chunk in sorted(chunks, key=lambda x: x.relevance_score, reverse=True):
+        if current_tokens + chunk.token_count <= max_tokens:
+            compressed_chunks.append(chunk)
+            current_tokens += chunk.token_count
+        else:
+            # 남은 토큰으로 청크 일부 포함
+            remaining_tokens = max_tokens - current_tokens
+            if remaining_tokens > 50:  # 최소 50토큰 확보
+                truncated_content = self.token_counter.truncate_to_tokens(
+                    chunk.content, remaining_tokens
+                )
+                truncated_chunk = DocumentChunk(
+                    id=chunk.id + "_truncated",
+                    content=truncated_content,
+                    token_count=remaining_tokens,
+                    relevance_score=chunk.relevance_score,
+                    chunk_type="truncated"
+                )
+                compressed_chunks.append(truncated_chunk)
+            break
+
+    return compressed_chunks
+```
+
+**장점**: 빠르고 간단
+**단점**: 정보 손실 가능성
+
+**2. Selective(선택적 압축)**
+
+```python
+def _selective_compression(self, chunks: List[DocumentChunk],
+                          max_tokens: int) -> List[DocumentChunk]:
+    """관련성에 따라 전체 포함 vs 요약 포함 결정"""
+    sorted_chunks = sorted(chunks, key=lambda x: x.relevance_score, reverse=True)
+    selected_chunks = []
+    current_tokens = 0
+
+    for chunk in sorted_chunks:
+        if chunk.relevance_score >= 0.7:  # 높은 관련성 → 전체 포함
+            if current_tokens + chunk.token_count <= max_tokens:
+                selected_chunks.append(chunk)
+                current_tokens += chunk.token_count
+
+        elif chunk.relevance_score >= 0.4:  # 중간 관련성 → 요약 포함
+            summary_length = min(chunk.token_count // 2, 150)
+            if current_tokens + summary_length <= max_tokens:
+                summary = self._generate_summary(chunk.content, summary_length)
+                summary_chunk = DocumentChunk(
+                    id=chunk.id + "_selective",
+                    content=summary,
+                    token_count=self.token_counter.count_tokens(summary),
+                    relevance_score=chunk.relevance_score,
+                    chunk_type="summary"
+                )
+                selected_chunks.append(summary_chunk)
+                current_tokens += summary_chunk.token_count
+
+    return selected_chunks
+```
+
+**장점**: 중요 정보는 보존하면서 덜 중요한 정보는 요약
+**단점**: LLM 호출로 인한 지연 시간 증가
+
+**3. 압축 방식 비교**
+
+| 압축 방식 | 처리 속도 | 정보 보존률 | 비용 | 적합한 경우 |
+|---------|---------|-----------|------|-----------|
+| **Truncate** | 빠름 | 낮음 | 없음 | 실시간 응답 필요 |
+| **Summarize** | 매우 느림 | 중간 | 높음(LLM 호출) | 정보 압축 중요 |
+| **Selective** | 느림 | 높음 | 중간 | 품질과 속도 균형 |
+
+---
+
+##### 3.4.6 ContextManager 통합 관리
+
+모든 컨텍스트 관리 기능을 통합한 클래스입니다.
+
+```python
+class ContextManager:
+    """컨텍스트 윈도우 관리를 위한 메인 클래스"""
+
+    def __init__(self, max_tokens: int = 4000, compression_threshold: float = 0.8):
+        self.max_tokens = max_tokens
+        self.compression_threshold = compression_threshold
+        self.token_counter = TokenCounter()
+        self.compressor = ContextCompressor()
+
+        # 청킹 전략들
+        self.chunkers = {
+            "fixed": FixedSizeChunker(),
+            "semantic": SemanticChunker()
+        }
+
+    def prepare_context(self, documents: List[Dict],
+                       query: str,
+                       chunking_strategy: str = "semantic") -> ContextWindow:
+        """문서들로부터 컨텍스트 윈도우 준비"""
+
+        # 1. 문서 청킹
+        all_chunks = []
+        chunker = self.chunkers.get(chunking_strategy, self.chunkers["semantic"])
+
+        for doc in documents:
+            chunks = chunker.chunk_document(doc['content'], doc.get('metadata', {}))
+            all_chunks.extend(chunks)
+
+        # 2. 관련성 점수 계산 (쿼리와의 코사인 유사도)
+        all_chunks = self._calculate_relevance_scores(all_chunks, query)
+
+        # 3. 관련성 기반 필터링 (최소 임계값 0.2)
+        relevant_chunks = [
+            chunk for chunk in all_chunks
+            if chunk.relevance_score >= 0.2
+        ]
+
+        # 4. 토큰 수 계산
+        total_tokens = sum(chunk.token_count for chunk in relevant_chunks)
+
+        # 5. 압축 필요성 판단
+        compression_needed = total_tokens > (self.max_tokens * self.compression_threshold)
+
+        final_chunks = relevant_chunks
+        compression_ratio = 1.0
+
+        if compression_needed:
+            # 평균 관련성에 따라 압축 방법 결정
+            avg_relevance = np.mean([c.relevance_score for c in relevant_chunks])
+
+            if avg_relevance > 0.6:
+                compression_method = "selective"
+            elif avg_relevance > 0.4:
+                compression_method = "summarize"
+            else:
+                compression_method = "truncate"
+
+            final_chunks = self.compressor.compress_context(
+                relevant_chunks, self.max_tokens, compression_method
+            )
+
+            final_tokens = sum(chunk.token_count for chunk in final_chunks)
+            compression_ratio = final_tokens / total_tokens
+
+        # 6. 컨텍스트 윈도우 구성
+        context_window = ContextWindow(
+            chunks=final_chunks,
+            total_tokens=sum(chunk.token_count for chunk in final_chunks),
+            max_tokens=self.max_tokens,
+            compression_ratio=compression_ratio
+        )
+
+        return context_window
+```
+
+**전체 처리 흐름**
+
+```
+문서 입력
+  ↓
+청킹(Fixed or Semantic)
+  ↓
+관련성 점수 계산(코사인 유사도)
+  ↓
+필터링(관련성 < 0.2 제거)
+  ↓
+토큰 수 확인
+  ↓
+[토큰 > max_tokens * 0.8?]
+  ├─ Yes → 압축 (Truncate/Summarize/Selective)
+  └─ No  → 그대로 사용
+  ↓
+컨텍스트 윈도우 구성
+  ↓
+LLM에 전달
+```
+
+---
+
+##### 3.4.7 실전 사용 예시
+
+```python
+# 1. ContextManager 초기화
+context_manager = ContextManager(
+    max_tokens=2000,           # 최대 토큰 수
+    compression_threshold=0.8  # 80% 이상 시 압축
+)
+
+# 2. 문서 준비
+documents = [
+    {
+        "content": "RAG 시스템은... (긴 텍스트)",
+        "metadata": {"category": "RAG", "author": "연구팀"}
+    },
+    # ... 더 많은 문서
+]
+
+# 3. 사용자 쿼리
+query = "RAG 시스템에서 컨텍스트 관리가 왜 중요한가요?"
+
+# 4. 컨텍스트 윈도우 준비
+context_window = context_manager.prepare_context(
+    documents=documents,
+    query=query,
+    chunking_strategy="semantic"  # 의미 기반 청킹
+)
+
+# 5. 통계 정보 확인
+stats = context_manager.get_context_stats(context_window)
+print(f"총 청크 수: {stats['total_chunks']}")
+print(f"총 토큰 수: {stats['total_tokens']}")
+print(f"압축 비율: {stats['compression_ratio']:.2f}")
+print(f"평균 관련성: {stats['avg_relevance']:.3f}")
+
+# 6. 포맷된 컨텍스트 생성
+formatted_context = context_manager.format_context(context_window)
+
+# 7. LLM에 전달
+prompt = f"""
+다음 맥락 정보를 바탕으로 질문에 답해주세요.
+
+맥락 정보:
+{formatted_context}
+
+질문: {query}
+
+답변:
+"""
+
+# LLM 호출
+response = llm.generate(prompt)
+```
+
+**출력 예시**
+```
+총 청크 수: 8
+총 토큰 수: 1,847
+압축 비율: 0.75
+평균 관련성: 0.682
+
+[문서 1] (category: 컨텍스트관리, author: 시스템아키텍트)
+컨텍스트 관리는 RAG 시스템에서 가장 중요한 요소 중 하나입니다...
+
+[문서 2] (category: RAG, author: AI연구팀)
+RAG 시스템의 구성 요소:
+- 문서 저장소 (Document Store)
+- 벡터 데이터베이스 (Vector Database)...
+```
+
+---
+
+#### 3.5 실습 : RAG 시스템 실습(lab-03)
 
 **학습 목표**
 - RAG 시스템의 전체 파이프라인 직접 구현 및 최적화
@@ -1802,9 +2823,9 @@ LLM: "2024년 3분기 매출은 150억원으로 전년 대비 20% 증가했습�
 
 ---
 
-#### 3.4 RAG 검색 최적화 기법
+#### 3.6 RAG 검색 최적화 기법
 
-##### 3.4.1 하이브리드 검색(Hybrid Search)
+##### 3.6.1 하이브리드 검색(Hybrid Search)
 
 키워드 기반 검색과 벡터 기반 검색을 결합하여 각각의 장점을 활용하는 방법.
 
@@ -1838,7 +2859,7 @@ LLM: "2024년 3분기 매출은 150억원으로 전년 대비 20% 증가했습�
 
 ---
 
-##### 3.4.2 Re-ranking(재정렬)
+##### 3.6.2 Re-ranking(재정렬)
 
 초기 검색 결과를 더 정교한 모델로 재평가하여 정확도를 높이는 2단계 검색 전략.
 
@@ -1908,7 +2929,7 @@ Document → Encoder → [0.3, 0.6, ...]─┘
 
 ---
 
-##### 3.4.3 Query Expansion(쿼리 확장)
+##### 3.6.3 Query Expansion(쿼리 확장)
 
 원래 질문을 여러 형태로 변형하여 검색 범위를 넓히고 Recall을 향상시키는 기법.
 
@@ -1948,7 +2969,7 @@ Document → Encoder → [0.3, 0.6, ...]─┘
 
 ---
 
-##### 3.4.4 Multi-hop Reasoning(다단계 추론)
+##### 3.6.4 Multi-hop Reasoning(다단계 추론)
 
 하나의 질문에 답하기 위해 여러 문서를 순차적으로 검색하고 연결하는 기법.
 
@@ -1994,7 +3015,7 @@ Document → Encoder → [0.3, 0.6, ...]─┘
 
 ---
 
-#### 3.5 RAG 성능 최적화 전략
+#### 3.7 RAG 성능 최적화 전략
 
 - 할루시네이션 방지
 
@@ -2023,7 +3044,7 @@ Document → Encoder → [0.3, 0.6, ...]─┘
 
 ---
 
-#### 3.6 RAG의 현재와 미래: 다양한 접근법과 정답의 부재
+#### 3.8 RAG의 현재와 미래: 다양한 접근법과 정답의 부재
 
 ##### RAG의 진화 과정
 
