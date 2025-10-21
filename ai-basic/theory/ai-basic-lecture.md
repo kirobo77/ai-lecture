@@ -636,6 +636,36 @@ Decoder 작동:
 출력(영어): "Hello I love you"
 ```
 
+**Thinking과 Reasoning**
+
+**Thinking(사고)**
+
+Thinking은 더 넓고 포괄적인 개념으로, LLM이 입력을 처리하고 출력을 생성하는 전체 과정을 의미함
+
+- 패턴 인식과 연상
+- 학습된 표현들 간의 연결
+- 컨텍스트 이해와 해석
+- 창의적 생성과 조합
+- 직관적이고 암묵적인 처리 과정
+
+즉, LLM의 thinking은 Transformer 아키텍처의 attention 메커니즘을 통해 토큰들 간의 관계를 파악하고, 학습된 패턴을 바탕으로 다음 토큰을 예측하는 과정 전체를 포괄
+
+**Reasoning(추론)**
+
+Reasoning은 thinking의 특정한 하위 집합으로, 더 구조화되고 논리적인 과정
+
+- 명시적인 단계별 추론
+- 인과관계 파악과 논리적 연결
+- 전제에서 결론 도출
+- 문제 분해와 체계적 해결
+- 검증 가능한 논리 체인
+
+최근 o1 같은 모델들이 주목받는 이유는 바로 이 reasoning 능력을 강화했기 때문이며, CoT(Chain-of-Tought) 프롬프팅이나 self-consistency 같은 기법들도 LLM의 reasoning을 개선하려는 시도임
+
+**Thinking과 Resoning의 핵심 차이?**
+
+LLM이 "파리는 프랑스의 수도다"라고 답을 하는 것은 thinking(패턴 매칭)의 결과일 수 있지만 "파리는 프랑스에 있고, 프랑스의 수도이므로, 파리는 유럽의 주요 도시다"라고 단계적으로 추론하는 것은 reasoning
+
 **Transformer의 혁신 요약**
 
 - **병렬 처리**: 모든 단어를 동시에 처리 → 빠름
