@@ -2807,12 +2807,85 @@ RAG 시스템의 구성 요소:
 - 실제 사용 가능한 웹 인터페이스 구현
 
 **실습 파일**
-- `basic_rag.py`: 기본 RAG 파이프라인 구현
+- `basic_rag.py`: 기본 RAG 파이프라인 구현 (순수 구현)
 - `advanced_retrieval.py`: 고급 검색 기법 및 하이브리드 검색
 - `context_management.py`: 효율적인 컨텍스트 윈도우 관리
 - `rag_web_app.py`: **Streamlit 웹 인터페이스**
 - `basic_rag_langchain.py`: LangChain 기반 구현(비교 학습)
 - `advanced_retrieval_langchain.py`: LangChain 고급 검색 기법
+
+**LangChain 프레임워크 소개**
+
+LangChain은 LLM 애플리케이션 개발을 위한 오픈소스 프레임워크로, RAG 시스템 구현을 크게 간소화해줍니다.
+
+**LangChain의 핵심 컴포넌트**
+- **Chains** : 여러 LLM 호출을 연결하여 복잡한 워크플로우 구성
+- **Retrievers** : 벡터 스토어에서 문서 검색을 위한 표준화된 인터페이스
+- **Prompts** : 프롬프트 템플릿과 체인을 통한 구조화된 프롬프트 관리
+- **Output Parsers** : LLM 출력을 구조화된 데이터로 변환
+- **Vector Stores** : 다양한 벡터 데이터베이스와의 통합 지원
+
+**순수 구현 vs LangChain 비교**
+
+| 구분 | 순수 구현 (basic_rag.py) | LangChain 구현 (basic_rag_langchain.py) |
+|------|-------------------------|----------------------------------------|
+| **코드 복잡도** | 높음 (500+ 라인) | 낮음 (300+ 라인) |
+| **커스터마이징** | 완전한 제어 가능 | 프레임워크 제약 존재 |
+| **학습 곡선** | RAG 원리 깊이 이해 필요 | LangChain API 학습 필요 |
+| **유지보수** | 모든 컴포넌트 직접 관리 | 프레임워크 업데이트 의존 |
+| **성능 최적화** | 세밀한 튜닝 가능 | 프레임워크 최적화 수준 |
+| **확장성** | 무제한 확장 가능 | LangChain 생태계 내에서 확장 |
+
+**실습 진행 가이드**
+
+1. **순수 구현 먼저 실행** (`basic_rag.py`)
+   - RAG 파이프라인의 각 컴포넌트 동작 원리 이해
+   - QueryProcessor, DocumentRetriever, ResponseGenerator 클래스 역할 파악
+   - 직접 구현한 검색 및 생성 로직 분석
+
+2. **LangChain 구현 실행** (`basic_rag_langchain.py`)
+   - 동일한 기능을 LangChain으로 구현한 버전 비교
+   - Chain, Retriever, PromptTemplate 등 LangChain 컴포넌트 활용법 학습
+   - 코드 간소화 효과 확인
+
+3. **성능 및 코드 비교 분석**
+   - 실행 시간, 메모리 사용량 비교
+   - 코드 가독성 및 유지보수성 평가
+   - 각 방식의 장단점 정리
+
+**각 실습 파일별 핵심 구현 포인트**
+
+**1. basic_rag.py (순수 구현)**
+```python
+# 핵심 클래스 구조
+class QueryProcessor:      # 사용자 질문 전처리 및 쿼리 확장
+class DocumentRetriever:   # ChromaDB 벡터 검색 구현
+class ResponseGenerator:   # 검색된 문서 기반 답변 생성
+class BasicRAGSystem:      # 전체 파이프라인 통합 관리
+```
+- **학습 포인트**: RAG의 각 단계를 직접 구현하여 내부 동작 원리 이해
+- **핵심 기능**: 쿼리 전처리, 벡터 검색, 컨텍스트 구성, 프롬프트 엔지니어링
+
+**2. basic_rag_langchain.py (LangChain 구현)**
+```python
+# LangChain 컴포넌트 활용
+embeddings = OpenAIEmbeddings()           # 임베딩 모델
+vectorstore = Chroma()                    # 벡터 스토어
+retriever = vectorstore.as_retriever()    # 검색기
+rag_chain = chain | retriever | prompt | llm  # 체인 구성
+```
+- **학습 포인트** : 프레임워크를 활용한 간결한 RAG 구현
+- **핵심 기능** : Chain 패턴, Retriever 인터페이스, PromptTemplate 활용
+
+**3. advanced_retrieval.py**
+- **하이브리드 검색** : BM25 + 벡터 검색 결합
+- **재순위화** : 검색 결과 후처리를 통한 정확도 향상
+- **메타데이터 필터링** : 문서 유형별 검색 범위 제한
+
+**4. context_management.py**
+- **동적 컨텍스트 윈도우** : 토큰 제한에 따른 적응적 문서 선택
+- **중복 제거** : 유사한 문서들의 중복 제거 알고리즘
+- **우선순위 기반 선택** : 관련도와 다양성을 고려한 문서 선택
 
 **핵심 학습 포인트**
 - RAG 아키텍처의 각 컴포넌트별 구현 원리 이해
@@ -2826,6 +2899,29 @@ RAG 시스템의 구성 요소:
 - 검색 성능 비교 분석 보고서
 - 웹 기반 사용자 인터페이스
 - LangChain vs 순수 구현 비교 분석
+
+**실습 후 토론 포인트**
+
+**1. 구현 방식 선택 기준**
+- 언제 순수 구현을 선택해야 하는가?
+- 언제 LangChain 같은 프레임워크를 사용해야 하는가?
+- 프로덕션 환경에서의 고려사항은?
+
+**2. 성능 최적화 전략**
+- 검색 속도 vs 정확도 트레이드오프
+- 벡터 데이터베이스 선택 기준 (ChromaDB vs Pinecone vs Weaviate)
+- 임베딩 모델 선택이 검색 품질에 미치는 영향
+
+**3. 확장성과 유지보수**
+- 대규모 문서 처리 시 고려사항
+- 실시간 업데이트가 필요한 경우의 전략
+- 모니터링 및 로깅 구현 방안
+
+**4. 실제 적용 시나리오**
+- 기업 내부 지식 베이스 구축
+- 고객 지원 챗봇 개발
+- 연구 논문 검색 시스템
+- 법률 문서 분석 시스템
 
 ---
 
