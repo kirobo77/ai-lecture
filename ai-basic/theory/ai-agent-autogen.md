@@ -1038,7 +1038,8 @@ class AionuLLMClient:
 
         self.headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "curl/8.4.0"
         }
         self.session = requests.Session()
         self.session.headers.update(self.headers)
